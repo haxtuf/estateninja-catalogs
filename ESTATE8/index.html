@@ -1,0 +1,1550 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Customer Catalog</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f0f0f1;
+        --card: #ffffff;
+        --text: #18181b;
+        --muted: #6b7280;
+        --border: #e4e4e7;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid var(--border);
+        background: var(--card);
+        height: 56px;
+      }
+      .header-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 12px 16px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+      }
+      .header-inner img { height: 40px; width: auto; display: block; }
+      @media (min-width: 768px) {
+        header { height: 64px; }
+        .header-inner img { height: 48px; }
+      }
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px 16px 48px;
+      }
+      .title-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+      h1 { margin: 0; font-size: 28px; }
+      .estate-logo {
+        height: 64px;
+        width: auto;
+        max-width: 240px;
+        object-fit: contain;
+      }
+      .meta {
+        color: var(--muted);
+        margin-bottom: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .meta a { color: inherit; text-decoration: underline; }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+      select {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: var(--card);
+        color: var(--text);
+        font-size: 14px;
+      }
+      .pagination {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-top: 24px;
+        justify-content: center;
+      }
+      .pagination button {
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--text);
+        border-radius: 8px;
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .pagination button:hover:not(:disabled) {
+        background: var(--bg);
+      }
+      .pagination button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .pagination .page-info {
+        color: var(--muted);
+        font-size: 14px;
+        padding: 0 8px;
+      }
+      .loading-skeleton {
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        border: 1px solid var(--border);
+        background: var(--card);
+        border-radius: 16px;
+        padding: 0;
+        text-align: left;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      .card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0,0,0,0.12); }
+      .image {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        overflow: hidden;
+        border-radius: 16px 16px 0 0;
+        background: #d4d4d8;
+      }
+      .image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .placeholder { width: 100%; height: 100%; background: #d4d4d8; }
+      .title { padding: 12px 14px 14px; font-weight: 600; }
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .modal.open { display: flex; }
+      .modal-card {
+        max-width: 640px;
+        width: 100%;
+        background: var(--card);
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        padding: 18px;
+      }
+      .modal-title { font-weight: 600; margin: 0 0 12px; }
+      .modal-body { max-height: 60vh; overflow-y: auto; white-space: pre-wrap; color: var(--text); }
+      .modal-close {
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text);
+        border-radius: 999px;
+        padding: 6px 12px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-inner">
+        <img src="media/estateninja%20horizontal%20header%20light.png" alt="Estate Ninja" />
+      </div>
+    </header>
+    <main>
+      <div class="title-row">
+        <h1>Highlight Items</h1>
+        
+      </div>
+      <div class="meta">
+        
+        
+        
+      </div>
+      <div class="controls">
+        <select id="categoryFilter">
+          <option value="all" selected>All categories</option><option value="Electronics &amp; Technology">Electronics &amp; Technology</option><option value="Tools &amp; Hobby Equipment">Tools &amp; Hobby Equipment</option><option value="Musical Instruments &amp; Audio Gear">Musical Instruments &amp; Audio Gear</option><option value="Furniture">Furniture</option><option value="Games and Media (Board Games, Video Games, Movies)">Games and Media (Board Games, Video Games, Movies)</option><option value="Household &quot;Maybe Valuable&quot; Items">Household &quot;Maybe Valuable&quot; Items</option><option value="Wall Art">Wall Art</option><option value="Fitness and Sports">Fitness and Sports</option><option value="Firearms, Ammunition &amp; Weapons">Firearms, Ammunition &amp; Weapons</option><option value="Kitchen and Dining">Kitchen and Dining</option><option value="Collectables">Collectables</option><option value="Clothing and Linens">Clothing and Linens</option><option value="Outdoor, Military &amp; Tactical Items">Outdoor, Military &amp; Tactical Items</option><option value="Books, Manuals &amp; Paper Collections">Books, Manuals &amp; Paper Collections</option><option value="Holiday &amp; Seasonal">Holiday &amp; Seasonal</option>
+        </select>
+      </div>
+      <div class="grid" id="catalogGrid">
+        
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Apple 16&quot; MacBook Pro" data-description="Top-of-the-line 16-inch Apple MacBook Pro with the powerful M4 Pro chip, a gorgeous Liquid Retina XDR display, and a generous 48 GB of memory—perfect for creative pros, developers, and power users. This sleek silver machine is in excellent, like-new condition and still covered by AppleCare+ through December 2027, giving you years of worry-free use. With roughly 1 TB of fast SSD storage and the latest macOS Sequoia installed, it’s ready for demanding photo, video, music, and productivity work right out of the box.">
+          <div class="image"><img src="media/items/0f32847b-505c-41a1-984a-98437840b0b9.webp" alt="Apple 16&quot; MacBook Pro" loading="lazy" decoding="async" /></div>
+          <div class="title">Apple 16&quot; MacBook Pro</div>
+        </button>
+      
+        <button class="card" data-category="Tools &amp; Hobby Equipment" data-title="Scag zero turn mower" data-description="Heavy-duty Scag commercial zero turn mower, ideal for large properties or a small lawn business. Features a comfortable high-back seat, dual steering levers, and a wide front foot platform for easy access to the deck. Known for rugged construction and long service life, this machine is built to handle serious mowing jobs season after season.">
+          <div class="image"><img src="media/items/b26c4d3f-a600-4ddb-b1e2-9fa2a9c27fe7.webp" alt="Scag zero turn mower" loading="lazy" decoding="async" /></div>
+          <div class="title">Scag zero turn mower</div>
+        </button>
+      
+        <button class="card" data-category="Musical Instruments &amp; Audio Gear" data-title="Wm Knabe baby grand" data-description="Classic Wm Knabe baby grand piano in a rich dark wood finish, ready to be the centerpiece of a living room or music room. The cabinet has attractive traditional styling and comes with a matching bench and a stack of lesson books and sheet music to get someone started. Ideal for a student or casual player looking for a real acoustic instrument at an approachable price, as long as they are prepared to have it tuned and serviced after moving.">
+          <div class="image"><img src="media/items/01367fe2-e9bd-4c2e-b83a-f07a289266f6.webp" alt="Wm Knabe baby grand" loading="lazy" decoding="async" /></div>
+          <div class="title">Wm Knabe baby grand</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Victorian style sofa" data-description="Elegant Victorian-style sofa with richly carved wood frame and classic tufted back, perfect for a formal living room or parlor. The floral upholstery has a traditional look that pairs well with antique or vintage décor, and the dramatic high back makes this a real statement piece. Ideal for someone who loves period style furniture or wants a standout seating piece for a sitting room or photo backdrop.">
+          <div class="image"><img src="media/items/0ad7ae86-1b13-4238-941b-80f609bd9db8.webp" alt="Victorian style sofa" loading="lazy" decoding="async" /></div>
+          <div class="title">Victorian style sofa</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Kimball Victorian Accent Chair" data-description="Elegant Kimball Victorian-style accent chair with rich carved wood frame and plush pink upholstery. The high, balloon back and channel-tufted sides give it a dramatic parlor look that works beautifully in a bedroom, sitting room, or as a statement piece in an entry. A quality reproduction from a respected maker, ready to enjoy as-is or as a candidate for future reupholstery in your favorite fabric.">
+          <div class="image"><img src="media/items/11313a05-0120-4f2c-b202-861ed88b721c.webp" alt="Kimball Victorian Accent Chair" loading="lazy" decoding="async" /></div>
+          <div class="title">Kimball Victorian Accent Chair</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Mahogany four-poster bed" data-description="Elegant traditional mahogany four-poster bed frame with tall turned posts and a graceful arched headboard, perfect for a classic or formal bedroom. The rich wood tone and carved details give it a timeless, high-end look that pairs beautifully with antique or traditional furnishings.">
+          <div class="image"><img src="media/items/9867ff49-1ff3-4a52-9d78-ba178839cdef.webp" alt="Mahogany four-poster bed" loading="lazy" decoding="async" /></div>
+          <div class="title">Mahogany four-poster bed</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Chippendale style highboy" data-description="Elegant Chippendale-style highboy dresser with rich cherry-toned finish and classic brass-look hardware. The tall, dramatic bonnet top and carved fan details make this a standout statement piece for a traditional bedroom or foyer. Multiple drawers offer generous storage while the cabriole legs and shaped apron add a refined, timeless look. A great choice if you want the feel of an antique without the antique price or fragility.">
+          <div class="image"><img src="media/items/1bc545a9-64d9-473c-9ce8-51922b7f0f51.webp" alt="Chippendale style highboy" loading="lazy" decoding="async" /></div>
+          <div class="title">Chippendale style highboy</div>
+        </button>
+      
+        <button class="card" data-category="Games and Media (Board Games, Video Games, Movies)" data-title="Early MTG card trio" data-description="Nice trio of early Magic: The Gathering power cards, including Mana Vault, Wheel of Fortune, and Sol Ring. These classic artifacts and sorcery are staples in many older formats and Commander decks, and are great pickups for players or collectors looking to add vintage flavor to their builds. Sold together as a small lot for the Magic fan who appreciates the old-school look and feel.">
+          <div class="image"><img src="media/items/2d92ec61-1204-41df-abfb-afdd0264e115.webp" alt="Early MTG card trio" loading="lazy" decoding="async" /></div>
+          <div class="title">Early MTG card trio</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Cherry four poster bed" data-description="Elegant traditional cherry four-poster bed that brings classic style to any bedroom. The tall turned posts and warm wood tone make a beautiful focal point, and the frame appears sturdy and well cared for. Perfect for someone looking for a timeless, high-quality bed at an estate-sale value, ideal for a guest room or primary bedroom with traditional décor.">
+          <div class="image"><img src="media/items/40c3b8b9-3963-4811-bfe3-1e0ff6ea302e.webp" alt="Cherry four poster bed" loading="lazy" decoding="async" /></div>
+          <div class="title">Cherry four poster bed</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Vintage wrought iron patio set" data-description="Charming vintage white wrought iron patio set with classic mesh seats and decorative scrollwork, perfect for a covered porch or garden seating area. The set includes two loveseats, three armchairs, a mesh-top round coffee table, a small square side table, and a small round side table, offering plenty of seating for entertaining outdoors. Timeless mid-century style and sturdy metal construction make this a great choice for someone wanting a coordinated outdoor seating group with character.">
+          <div class="image"><img src="media/items/3732cbfc-b9fe-4a72-9bed-37d1f715fb1f.webp" alt="Vintage wrought iron patio set" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage wrought iron patio set</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Mahogany dining table" data-description="Handsome traditional mahogany dining table ready for your next gathering. The rich, warm finish and classic curved ends give it a timeless look that works with both formal and casual dining rooms. Pair it with your own chairs or the existing set if offered separately, and enjoy a large surface that easily handles family dinners, holidays, or game nights.">
+          <div class="image"><img src="media/items/d11b68be-efed-42fd-8ef9-beb8aec514e7.webp" alt="Mahogany dining table" loading="lazy" decoding="async" /></div>
+          <div class="title">Mahogany dining table</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Traditional grandfather clock" data-description="Handsome traditional grandfather clock with a rich wood case, brass-tone dial, and long pendulum weights that make a beautiful statement in an entry or living room. A classic decorative timepiece that adds warmth, movement, and a touch of old-world charm to the space, whether you keep it fully wound or simply enjoy it as a focal point.">
+          <div class="image"><img src="media/items/17040d95-d0a4-4f56-a05e-fd53eb855699.webp" alt="Traditional grandfather clock" loading="lazy" decoding="async" /></div>
+          <div class="title">Traditional grandfather clock</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Maytag top-load washer" data-description="Clean white Maytag top-load washing machine with modern controls and a deep-fill option, ideal for a laundry upgrade or rental property. The stainless-look control panel offers multiple wash cycles and temperature settings, including bulky items, quick wash, and heavy duty, giving plenty of flexibility for everyday loads. A solid, well-regarded brand that should appeal to anyone needing a dependable washer without paying new-appliance prices.">
+          <div class="image"><img src="media/items/d19964a8-98f4-4199-9d9a-3a952e03a235.webp" alt="Maytag top-load washer" loading="lazy" decoding="async" /></div>
+          <div class="title">Maytag top-load washer</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="LG top-freezer refrigerator" data-description="Clean LG white top-freezer refrigerator, perfect as a main kitchen unit or an extra garage fridge for drinks and overflow groceries. Simple, reliable design from a respected brand, with a neutral finish that fits into most spaces and decor styles. Great option if you need a full-size fridge without paying new-appliance prices.">
+          <div class="image"><img src="media/items/6fc2b7ad-56a6-430d-9815-58476225c5d1.webp" alt="LG top-freezer refrigerator" loading="lazy" decoding="async" /></div>
+          <div class="title">LG top-freezer refrigerator</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Vintage serpentine dresser" data-description="Handsome vintage serpentine-front dresser with four roomy drawers and elegant brass-style pulls. The warm medium wood tone and curvy front give it a classic, upscale look that works beautifully in a bedroom, hallway, or guest room. A solid, well-made piece that offers both storage and style in a relatively compact footprint.">
+          <div class="image"><img src="media/items/c66a5c5a-df13-4a90-baaa-496284dffdc4.webp" alt="Vintage serpentine dresser" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage serpentine dresser</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Vintage cherry dresser set" data-description="Handsome vintage cherry dresser with attached tilting mirror, perfect for adding classic warmth to a bedroom. The carved drawer fronts and scalloped base give it a traditional, elegant look, and the three deep drawers offer plenty of storage for clothing or linens. A great piece if you like solid, older furniture that still has years of life and charm left in it.">
+          <div class="image"><img src="media/items/be605c11-ccdb-44ed-b39b-56776d7e77d5.webp" alt="Vintage cherry dresser set" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage cherry dresser set</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Cherry dresser with mirror" data-description="Classic cherry-style 9-drawer dresser with attached framed mirror, offering tons of storage and a warm traditional look for any bedroom. The brass-tone pulls and molded edges give it a timeless style, and the drawers appear clean and functional, ready to go straight into use. Perfect if you need a substantial, well-made dresser without paying new furniture prices.">
+          <div class="image"><img src="media/items/33b58d84-85a5-4dc3-af72-a833f1a16dea.webp" alt="Cherry dresser with mirror" loading="lazy" decoding="async" /></div>
+          <div class="title">Cherry dresser with mirror</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Antique marble-top dresser" data-description="Handsome antique wooden dresser with a rich dark finish, marble top, and ornate attached mirror. The carved pulls and decorative mirror frame give it a classic Victorian-style look that works beautifully in a bedroom, entry, or guest room. A great statement piece that offers both storage and vintage charm.">
+          <div class="image"><img src="media/items/6b4b039b-1942-4595-8861-3b4f62f9e4bf.webp" alt="Antique marble-top dresser" loading="lazy" decoding="async" /></div>
+          <div class="title">Antique marble-top dresser</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Marble Top Lyre Console" data-description="Elegant marble-top console table with a rich mahogany-style finish and a decorative lyre-shaped base. The scalloped white marble adds a classic touch, making this a great hallway, entry, or behind-the-sofa accent piece. Perfect for displaying a lamp, art, or a TV as currently used.">
+          <div class="image"><img src="media/items/9ace91fb-6b4a-416b-9c60-8fd45f7306c0.webp" alt="Marble Top Lyre Console" loading="lazy" decoding="async" /></div>
+          <div class="title">Marble Top Lyre Console</div>
+        </button>
+      
+        <button class="card" data-category="Games and Media (Board Games, Video Games, Movies)" data-title="Modern board game lot" data-description="Great bundle of modern strategy and family board games, perfect for building or upgrading a game collection in one shot. Includes fan-favorite titles like Everdell Collector&#39;s Edition, King of Tokyo, Colt Express, Trekking The National Parks, Survive Escape From Atlantis, and more—ideal for game nights with friends or family.
+Save time and money by picking up a ready-made library of quality games instead of buying them one by one.">
+          <div class="image"><img src="media/items/4a0cc094-c381-4107-bc31-f4abf0be29aa.webp" alt="Modern board game lot" loading="lazy" decoding="async" /></div>
+          <div class="title">Modern board game lot</div>
+        </button>
+      
+        <button class="card" data-category="Games and Media (Board Games, Video Games, Movies)" data-title="Board game lot Everdell" data-description="Tote full of modern hobby board games ready for your next game night. Includes fan-favorite titles like Everdell Collector’s Edition, Trekking the National Parks, Galaxy Trucker, Colt Express, Survive Escape From Atlantis, and more. Great mix of themes and play styles, ideal for families, casual gamers, or anyone looking to build a collection fast.">
+          <div class="image"><img src="media/items/b8a0eb15-82ed-4ea1-9adb-821598cb287c.webp" alt="Board game lot Everdell" loading="lazy" decoding="async" /></div>
+          <div class="title">Board game lot Everdell</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Paris street oil painting" data-description="Large, richly detailed oil painting of a bustling Paris street scene with the Eiffel Tower in the distance, presented in an ornate gold-tone frame. The heavy, carved frame and textured brushwork give it a classic European gallery look that makes a strong focal point over a sofa, fireplace, or entryway. Ideal for French-inspired décor or anyone who loves romantic cityscapes.">
+          <div class="image"><img src="media/items/8de65b68-d580-4975-9831-16fef7814cf9.webp" alt="Paris street oil painting" loading="lazy" decoding="async" /></div>
+          <div class="title">Paris street oil painting</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Paris street scene painting" data-description="Large, richly textured Paris street scene oil painting in an impressive ornate gold-tone frame. The scene features bustling pedestrians, classic architecture, and the Eiffel Tower in the distance, making it a perfect statement piece for a living room, entryway, or office. The heavy, carved-style frame gives it an elegant, traditional look that instantly dresses up any wall.">
+          <div class="image"><img src="media/items/e82bae49-e35b-4951-ba5e-e39ba2bf4e84.webp" alt="Paris street scene painting" loading="lazy" decoding="async" /></div>
+          <div class="title">Paris street scene painting</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Cast iron pedestal mailbox" data-description="Handsome vintage-style cast metal pedestal mailbox with a classic &quot;LETTERS&quot; front and a raised horse-and-rider motif. This tall, freestanding box adds instant charm to a front porch or garden entry and offers both decorative appeal and practical mail storage. A great statement piece for traditional or historic-style homes.">
+          <div class="image"><img src="media/items/9008a37e-0ca0-4c55-9a49-f3e6901f1338.webp" alt="Cast iron pedestal mailbox" loading="lazy" decoding="async" /></div>
+          <div class="title">Cast iron pedestal mailbox</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="White top-load washer" data-description="Clean white top-load washing machine with simple, easy-to-use dial controls. Great for a laundry room, rental, or garage setup if you need an extra washer. Appears to be a more recent model with a smooth exterior and standard hookups, ready for someone who can transport and install it.">
+          <div class="image"><img src="media/items/cd4419dd-cdac-4eba-8e7a-156c0401b76a.webp" alt="White top-load washer" loading="lazy" decoding="async" /></div>
+          <div class="title">White top-load washer</div>
+        </button>
+      
+        <button class="card" data-category="Fitness and Sports" data-title="HealthRider folding treadmill" data-description="HealthRider folding treadmill, great for walking or light running at home. The unit folds up to save floor space and appears well cared for, with no obvious heavy wear on the deck or frame. Ideal for adding a cardio option to a spare room or home gym without committing to a permanent footprint.">
+          <div class="image"><img src="media/items/bc3d2ef1-09bf-4780-85d9-91242ae016d0.webp" alt="HealthRider folding treadmill" loading="lazy" decoding="async" /></div>
+          <div class="title">HealthRider folding treadmill</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Mahogany buffet cabinet" data-description="Handsome mahogany-style buffet cabinet with classic brass hardware, perfect for dining room storage or as a living room console. The rich, warm finish and paneled doors give it a traditional, upscale look, while the wide drawer and double-door cabinet offer plenty of space for linens, serving pieces, or barware. A great, versatile piece of furniture that can anchor a room and provide useful storage at the same time.">
+          <div class="image"><img src="media/items/40eed285-a2dc-4205-aa1f-4f3084861108.webp" alt="Mahogany buffet cabinet" loading="lazy" decoding="async" /></div>
+          <div class="title">Mahogany buffet cabinet</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Two-tone bow front dresser" data-description="Handsome two-tone bow front dresser with a classic, slightly modernized look. The black case contrasts nicely with the warm wood-grain drawer fronts and oval pulls, making it a great statement piece for a bedroom, entryway, or dining room storage. The curved front adds character and the multiple drawers offer plenty of space for clothes, linens, or household items.">
+          <div class="image"><img src="media/items/fbb90a56-312b-4298-8b54-7159c73f7692.webp" alt="Two-tone bow front dresser" loading="lazy" decoding="async" /></div>
+          <div class="title">Two-tone bow front dresser</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Marble top console table" data-description="Elegant demi-lune console table with a polished white marble top and rich carved wood base, perfect for an entryway, hallway, or behind a sofa. The classic design and real stone surface give it a timeless, upscale look that pairs well with traditional or transitional décor. Use it to display art, lamps, or family photos and instantly dress up any wall.">
+          <div class="image"><img src="media/items/fe7c57fb-494f-4a10-8ba1-e48e9759920e.webp" alt="Marble top console table" loading="lazy" decoding="async" /></div>
+          <div class="title">Marble top console table</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="French style armchair" data-description="Elegant French-style accent armchair with a beautifully carved wood frame and floral upholstery, perfect for a living room, bedroom, or reading nook. The generous seat, padded arms, and included striped accent pillow make it both comfortable and stylish, adding a classic, traditional touch to your decor.">
+          <div class="image"><img src="media/items/128b6657-ef71-44c0-8b3b-e31e6b66cdcd.webp" alt="French style armchair" loading="lazy" decoding="async" /></div>
+          <div class="title">French style armchair</div>
+        </button>
+      
+        <button class="card" data-category="Games and Media (Board Games, Video Games, Movies)" data-title="MTG Sol Ring card" data-description="Classic Magic: The Gathering &quot;Sol Ring&quot; artifact card with the iconic fiery ring artwork by Mark Tedin. A staple in many decks and a favorite among collectors, this early-style printing has the old brown artifact frame and original rules text. Great piece for a vintage MTG binder or to power up a Commander deck.">
+          <div class="image"><img src="media/items/5acd6494-d426-45ee-9fa2-1c8dfc0e2fbe.webp" alt="MTG Sol Ring card" loading="lazy" decoding="async" /></div>
+          <div class="title">MTG Sol Ring card</div>
+        </button>
+      
+        <button class="card" data-category="Games and Media (Board Games, Video Games, Movies)" data-title="MTG Sol Ring card" data-description="Classic Magic: The Gathering Sol Ring card with the iconic fiery ring artwork and old-style &quot;Mono Artifact&quot; text. A staple for Commander and vintage decks and a great pickup for collectors who appreciate early printings and nostalgic card frames.">
+          <div class="image"><img src="media/items/3407ede0-63aa-43e3-8d80-8473ef2dcc57.webp" alt="MTG Sol Ring card" loading="lazy" decoding="async" /></div>
+          <div class="title">MTG Sol Ring card</div>
+        </button>
+      
+        <button class="card" data-category="Firearms, Ammunition &amp; Weapons" data-title="9mm ammo can lot" data-description="Bulk lot of 9mm Luger range ammo packed in a handy plastic ammo can. Includes multiple boxes of Herter&#39;s 115 grain FMJ and at least one larger Browning 200-round box, ideal for target practice or stocking up for the range. Boxes appear factory-loaded and stored indoors, ready for your next shooting session.">
+          <div class="image"><img src="media/items/df5304c9-6556-4886-b54e-42a9b0fed0db.webp" alt="9mm ammo can lot" loading="lazy" decoding="async" /></div>
+          <div class="title">9mm ammo can lot</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Large pink dinnerware set" data-description="Beautiful, eye-catching pink dinnerware set with a huge number of matching pieces, perfect for someone who loves a coordinated table or wants a fun retro look. Includes bowls, plates, mugs, covered dishes, shakers, teapots and more, all in the same glossy pink glaze. Great for everyday use, parties, or as a colorful display in an open kitchen.">
+          <div class="image"><img src="media/items/51a34edb-0d1d-4c37-bc59-3f8029473945.webp" alt="Large pink dinnerware set" loading="lazy" decoding="async" /></div>
+          <div class="title">Large pink dinnerware set</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Antique wooden bed frame" data-description="Charming antique wooden bed frame with classic carved headboard and matching footboard, complete with its original metal spring base. A great candidate for restoration, a vintage-style guest room, or a creative repurposing project such as a garden bench or daybed. Solid wood construction and decorative details give it plenty of character and old-house charm.">
+          <div class="image"><img src="media/items/d336f1b8-ae55-4641-aa0e-29f689a75bcc.webp" alt="Antique wooden bed frame" loading="lazy" decoding="async" /></div>
+          <div class="title">Antique wooden bed frame</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Marble top lyre table" data-description="Elegant lyre-base side table with a white marble top and rich reddish mahogany-style finish. The carved floral drawer front and curvy base give it a classic Victorian-inspired look that works beautifully as a lamp table, bedside piece, or accent in a sitting room. A great way to add a touch of traditional charm without taking up much floor space.">
+          <div class="image"><img src="media/items/d2b112a3-db3f-47ec-bbde-6ceb84560a6d.webp" alt="Marble top lyre table" loading="lazy" decoding="async" /></div>
+          <div class="title">Marble top lyre table</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Victorian style parlor chair" data-description="Elegant Victorian-style parlor chair with rich carved wood frame and rose-pink channel-tufted upholstery. The high back and graceful curves make it a beautiful accent piece for a bedroom, sitting room, or reading nook. Some wear and discoloration to the fabric gives it a gently aged, authentic look and makes it a great candidate for reupholstery if you want to customize the color.">
+          <div class="image"><img src="media/items/06cc653d-add8-4522-9540-c9d6fe567f73.webp" alt="Victorian style parlor chair" loading="lazy" decoding="async" /></div>
+          <div class="title">Victorian style parlor chair</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Victorian style side chair" data-description="Charming Victorian-style accent chair with rich carved wood and plush gold tufted upholstery. The floral-carved crest and balloon back give it a classic parlor look that works beautifully in a bedroom, hallway, or reading nook. A great statement piece if you love traditional or vintage décor and want a pop of warm color.">
+          <div class="image"><img src="media/items/542172b6-8b90-4ef3-930a-068e9b3d0d2e.webp" alt="Victorian style side chair" loading="lazy" decoding="async" /></div>
+          <div class="title">Victorian style side chair</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Victorian parlor chair" data-description="Elegant Victorian-style parlor chair with a richly carved wood frame and classic balloon-back silhouette. The soft blue tufted upholstery gives it a romantic, period look and would be perfect as an accent piece in a bedroom, sitting room, or reading nook. A great candidate for reupholstery if you want to customize the fabric while keeping the beautiful antique-style frame.">
+          <div class="image"><img src="media/items/355ed4b8-5932-4aaa-8c71-5dff45b873d9.webp" alt="Victorian parlor chair" loading="lazy" decoding="async" /></div>
+          <div class="title">Victorian parlor chair</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Blue wingback armchair" data-description="Classic blue wingback armchair with a stylish patterned upholstery that brings a touch of traditional elegance to any living room, bedroom, or reading nook. The high back and generous seat make it a comfortable spot to relax, while the carved wooden legs and tailored lines give it a timeless, decorator look. Perfect as an accent chair beside a lamp table or as extra seating in a formal sitting area.">
+          <div class="image"><img src="media/items/f960b6b9-132a-4da4-bbff-77a3a71313d4.webp" alt="Blue wingback armchair" loading="lazy" decoding="async" /></div>
+          <div class="title">Blue wingback armchair</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Cherry Queen Anne nightstand" data-description="Elegant cherry Queen Anne–style nightstand with two roomy drawers, brass-look pulls, and a fitted glass top to protect the finish. A classic, traditional piece that works perfectly as a bedside table or lamp table in a living room or study. The cabriole legs and rich finish give it a timeless, upscale look that blends well with other formal or traditional furniture.">
+          <div class="image"><img src="media/items/26d4cecf-0829-46bb-80b6-7bdb34d9edb1.webp" alt="Cherry Queen Anne nightstand" loading="lazy" decoding="async" /></div>
+          <div class="title">Cherry Queen Anne nightstand</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Queen Anne console table" data-description="Elegant Queen Anne style console table with a fitted glass top, perfect for an entryway, behind a sofa, or as a display piece. The warm medium wood finish, cabriole legs, and brass-style drawer pulls give it a classic, traditional look, while the glass protects the surface for everyday use. A versatile piece that works well in both formal and casual spaces.">
+          <div class="image"><img src="media/items/bcc0834e-b17f-4713-9856-54d28018b70e.webp" alt="Queen Anne console table" loading="lazy" decoding="async" /></div>
+          <div class="title">Queen Anne console table</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Striped wingback chair" data-description="Comfortable blue and white striped wingback armchair with a classic rolled-arm silhouette and tailored upholstery. The nautical-style stripe works beautifully in a coastal, cottage, or modern farmhouse room. Includes the matching striped pillow and coordinating throw for an inviting, ready-to-use accent seating piece.">
+          <div class="image"><img src="media/items/3db9e383-fe21-45c0-8062-540747fbf9af.webp" alt="Striped wingback chair" loading="lazy" decoding="async" /></div>
+          <div class="title">Striped wingback chair</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Howard Miller wall clock" data-description="Classic Howard Miller pendulum wall clock in a rich cherry-style wood case, perfect for adding traditional charm and a warm chime to any room. The clock features a silver-tone dial with Roman numerals, decorative corner spandrels, and a glass-front door showcasing the brass pendulum and weights. A handsome, well-made piece for anyone who loves traditional timepieces and quality furniture-style clocks.">
+          <div class="image"><img src="media/items/8099459e-a197-4b19-bc74-d9e6b3dec5e2.webp" alt="Howard Miller wall clock" loading="lazy" decoding="async" /></div>
+          <div class="title">Howard Miller wall clock</div>
+        </button>
+      
+        <button class="card" data-category="Collectables" data-title="Antique mantel pendulum clock" data-description="Handsome antique wooden mantel clock with an ornate case, Roman numeral dial, and visible brass pendulum. This piece has a classic Victorian-era look and makes a strong decorative statement on a mantel, sideboard, or entry table, whether you plan to run it or simply enjoy it as a display piece.">
+          <div class="image"><img src="media/items/0aae40e8-371e-4947-9d58-1823137e340e.webp" alt="Antique mantel pendulum clock" loading="lazy" decoding="async" /></div>
+          <div class="title">Antique mantel pendulum clock</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Round tufted ottoman" data-description="Large, elegant round ottoman upholstered in a richly patterned paisley fabric with deep button tufting and decorative tassel fringe around the edge. This piece works beautifully as extra seating, a coffee-table alternative with a tray, or a statement accent in a traditional or eclectic living room.">
+          <div class="image"><img src="media/items/b1c5e448-1293-4153-8454-391c2fe2638a.webp" alt="Round tufted ottoman" loading="lazy" decoding="async" /></div>
+          <div class="title">Round tufted ottoman</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Mahogany drop-leaf table" data-description="Elegant mahogany drop-leaf sofa or hall table with classic pedestal base and brass-capped feet. The rich, glossy top and traditional styling make it a perfect accent behind a sofa, in an entryway, or along a dining room wall. Leaves can be raised for extra serving or display space, then dropped to save room when not needed.">
+          <div class="image"><img src="media/items/ede4328d-a9ad-4272-a080-9b2a6bf782be.webp" alt="Mahogany drop-leaf table" loading="lazy" decoding="async" /></div>
+          <div class="title">Mahogany drop-leaf table</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Antique cast iron heater" data-description="Beautiful ornate antique cast iron gas heater with a lot of vintage character. The detailed scrollwork and decorative front make this a great statement piece for a rustic, industrial, or Victorian-inspired space. Ideal as a display accent in a fireplace area, entryway, or shop—sold as a decorative collectible, not tested for use.">
+          <div class="image"><img src="media/items/907ca442-972c-4799-a664-2724166fce63.webp" alt="Antique cast iron heater" loading="lazy" decoding="async" /></div>
+          <div class="title">Antique cast iron heater</div>
+        </button>
+      
+        <button class="card" data-category="Fitness and Sports" data-title="Multi-station home gym" data-description="Sturdy multi-station home gym with weight stack, perfect for setting up a budget-friendly workout space at home. Includes stations for chest press, lat pulldown, leg extension and more, offering a full-body workout in one footprint. Great option if you want serious resistance training without buying separate machines.">
+          <div class="image"><img src="media/items/8c7e5651-87ef-4d4c-b114-1473806a71b9.webp" alt="Multi-station home gym" loading="lazy" decoding="async" /></div>
+          <div class="title">Multi-station home gym</div>
+        </button>
+      
+        <button class="card" data-category="Tools &amp; Hobby Equipment" data-title="Vintage wooden platform scale" data-description="Large vintage wooden platform beam scale with classic industrial charm, perfect as a statement piece in a loft, shop, or rustic basement. The wood upright, cast-iron base, and hanging counterweights give it a great old-factory look, and the rolling base makes it an eye-catching display even if you never use it for weighing. Ideal for decorators, collectors of old tools, or anyone wanting a unique conversation piece with authentic age and patina.">
+          <div class="image"><img src="media/items/f1c328bb-b1f3-4f5f-8bfe-853b1e0bd976.webp" alt="Vintage wooden platform scale" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage wooden platform scale</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Singer sewing machine cabinet" data-description="Nice vintage Singer sewing machine set into a classic wood cabinet with fold-out leaves for extra work space. A great piece for someone who sews or wants a sturdy, mid-century style workstation that doubles as attractive furniture. Includes foot pedal and accessory box on top, offering a ready-to-use setup once threaded and tested.">
+          <div class="image"><img src="media/items/88d5b8db-0cf2-4c63-bb6f-a1d1f534b57d.webp" alt="Singer sewing machine cabinet" loading="lazy" decoding="async" /></div>
+          <div class="title">Singer sewing machine cabinet</div>
+        </button>
+      
+        <button class="card" data-category="Tools &amp; Hobby Equipment" data-title="Fimco tow sprayer" data-description="Tow-behind lawn and garden sprayer with large poly tank, pump, and long hose, ideal for spraying weeds, fertilizer, or treatments over larger yards or acreage. Hook it up to a lawn tractor or ATV and cover a lot of ground quickly without carrying a backpack sprayer.">
+          <div class="image"><img src="media/items/5514c612-23a5-4a7b-ab69-93dc2a8a72fc.webp" alt="Fimco tow sprayer" loading="lazy" decoding="async" /></div>
+          <div class="title">Fimco tow sprayer</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Michael Catton floral painting" data-description="Brighten a room with this cheerful original floral painting signed by Michael Catton. Vivid pink blooms pop against a bold yellow background, all set in an ornate dark frame that gives it a finished, gallery-ready look. Perfect for adding a splash of color to a living room, hallway, or bedroom.">
+          <div class="image"><img src="media/items/07c0efa7-8462-40e7-967c-c620285f8267.webp" alt="Michael Catton floral painting" loading="lazy" decoding="async" /></div>
+          <div class="title">Michael Catton floral painting</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Victorian garden scene print" data-description="Elegant large Victorian-style garden scene in a richly detailed ornate frame, perfect as a statement piece over a sofa or in a formal dining room. The romantic outdoor tea setting and soft pastel colors give it a classic, old-world charm that works beautifully with traditional décor. Ready to hang and instantly fill a wall with character and warmth.">
+          <div class="image"><img src="media/items/c24b9e31-c487-4f0a-9b7a-20243b585a3c.webp" alt="Victorian garden scene print" loading="lazy" decoding="async" /></div>
+          <div class="title">Victorian garden scene print</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Antique gingerbread mantel clock" data-description="Handsome antique gingerbread-style mantel clock with a richly carved wooden case and glass front showcasing the brass pendulum. The classic Roman numeral dial and warm wood tone make this a great statement piece for a mantel, sideboard, or entry table, whether you plan to display it as-is or have it serviced for regular use.">
+          <div class="image"><img src="media/items/2a2d8a5b-17bc-4044-9541-b7cf288453f6.webp" alt="Antique gingerbread mantel clock" loading="lazy" decoding="async" /></div>
+          <div class="title">Antique gingerbread mantel clock</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Reed &amp; Barton flatware set" data-description="Elegant Reed &amp; Barton silverplate flatware set in a fitted storage case, featuring a richly ornate handle pattern that adds instant sparkle to any table. A great choice if you want a classic, traditional look for dinners, holidays, or entertaining without paying sterling prices. Nicely kept and ready to use with plenty of life and shine left in the plating.">
+          <div class="image"><img src="media/items/ff744d30-3512-44f2-b1b9-ad499e0ea996.webp" alt="Reed &amp; Barton flatware set" loading="lazy" decoding="async" /></div>
+          <div class="title">Reed &amp; Barton flatware set</div>
+        </button>
+      
+        <button class="card" data-category="Tools &amp; Hobby Equipment" data-title="Wilton 4&quot; bench vise" data-description="Solid vintage Wilton 4&quot; bench vise, ready to go back to work in a shop or garage. Known for their durability and smooth action, these older Wilton vises are highly regarded and hard to beat for everyday clamping, metalwork, or general repair tasks. A great upgrade over modern light-duty vises.">
+          <div class="image"><img src="media/items/c2fb832f-9b7f-4810-a236-a5e027d382ca.webp" alt="Wilton 4&quot; bench vise" loading="lazy" decoding="async" /></div>
+          <div class="title">Wilton 4&quot; bench vise</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Victorian style side chair" data-description="Charming Victorian-style accent chair with a carved balloon back and rich golden tufted upholstery. The ornate floral crest and curvy cabriole legs make this a great statement piece for a bedroom, hallway, or reading nook. Perfect for adding a touch of antique character and warmth to a traditional or eclectic space.">
+          <div class="image"><img src="media/items/8998def8-b489-4357-b4a7-23bc0dd8010e.webp" alt="Victorian style side chair" loading="lazy" decoding="async" /></div>
+          <div class="title">Victorian style side chair</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Butler tray coffee table" data-description="Handsome mahogany-style butler tray coffee table with a fitted glass top, perfect for a living room or den. The raised tray-style rim with cutout handles adds both charm and practicality, keeping items from sliding off while still looking elegant. A nice, classic piece that can blend with traditional or transitional décor and offers a generous surface for books, drinks, or display.">
+          <div class="image"><img src="media/items/cd94ea78-a0c3-4c7d-93fd-3ec99e712f37.webp" alt="Butler tray coffee table" loading="lazy" decoding="async" /></div>
+          <div class="title">Butler tray coffee table</div>
+        </button>
+      
+        <button class="card" data-category="Clothing and Linens" data-title="Sleep Number weighted blanket" data-description="High-quality Sleep Number True Temp 20 lb weighted blanket in its carry bag, designed to help reduce stress and promote relaxation. The neutral gray color works with most bedrooms, and the premium brand makes this a great upgrade from generic weighted blankets.">
+          <div class="image"><img src="media/items/a8f5e7f0-fc41-418e-b26a-6f31b11818cf.webp" alt="Sleep Number weighted blanket" loading="lazy" decoding="async" /></div>
+          <div class="title">Sleep Number weighted blanket</div>
+        </button>
+      
+        <button class="card" data-category="Fitness and Sports" data-title="Cubii JR2 under-desk elliptical" data-description="Stay active while you sit with this Cubii JR2 under‑desk elliptical, perfect for adding low‑impact movement while working, reading, or watching TV. Compact and quiet with adjustable resistance and digital display, it’s an easy way to boost daily steps and circulation without leaving your chair.">
+          <div class="image"><img src="media/items/a6d88d9a-037e-4aa2-92f3-63eb764c0fcb.webp" alt="Cubii JR2 under-desk elliptical" loading="lazy" decoding="async" /></div>
+          <div class="title">Cubii JR2 under-desk elliptical</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Cherry cheval floor mirror" data-description="Handsome traditional cheval floor mirror in a rich cherry finish, perfect for a classic bedroom or dressing area. The full-length tilting design makes it easy to check outfits from head to toe, and the turned side posts and shaped crest add a nice touch of vintage style. A great accent piece that pairs well with other traditional bedroom furniture.">
+          <div class="image"><img src="media/items/2041b7cf-a0b3-4403-93ef-1478d316fde7.webp" alt="Cherry cheval floor mirror" loading="lazy" decoding="async" /></div>
+          <div class="title">Cherry cheval floor mirror</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Breville toaster oven" data-description="Breville countertop toaster oven with stainless finish, perfect for everyday toasting, reheating, and small-batch baking without firing up a full-size oven. Known for even heating and solid build quality, this compact unit is ideal for apartments, dorms, or as a second oven in a busy kitchen.">
+          <div class="image"><img src="media/items/395f7093-912c-4a60-a23c-8a8c1bdaed61.webp" alt="Breville toaster oven" loading="lazy" decoding="async" /></div>
+          <div class="title">Breville toaster oven</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="GE stainless microwave" data-description="GE stainless steel countertop microwave with digital controls, perfect for everyday reheating, defrosting, and quick meals. Clean, modern look that fits nicely under cabinets and matches most stainless kitchens. A solid, name-brand appliance for a fraction of new cost.">
+          <div class="image"><img src="media/items/3a8bd421-3fc9-485d-9dd3-05e025b9c168.webp" alt="GE stainless microwave" loading="lazy" decoding="async" /></div>
+          <div class="title">GE stainless microwave</div>
+        </button>
+      
+        <button class="card" data-category="Clothing and Linens" data-title="Vintage ivory wedding dress" data-description="Elegant vintage ivory wedding gown stored in a preservation box, featuring a beautifully beaded lace bodice and flowing satin-style skirt. Perfect for a bride seeking a classic, romantic look, a costume designer, or someone wanting to repurpose quality vintage fabric and lace for a new creation. Come take a look in person to see the detail and fit.">
+          <div class="image"><img src="media/items/eb75dae4-c69b-4524-b2db-787acbd3e189.webp" alt="Vintage ivory wedding dress" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage ivory wedding dress</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Framed city oil painting" data-description="Richly textured oil painting of a bustling city street, presented in a deep, ornate frame that really makes the colors pop. The warm yellows, reds, and browns give it a European market feel and make it an easy piece to work into traditional or eclectic décor. A great ready-to-hang accent for an entryway, hallway, or over a small console table.">
+          <div class="image"><img src="media/items/3f55c891-3a56-4a3d-b472-ca82ec5c5c24.webp" alt="Framed city oil painting" loading="lazy" decoding="async" /></div>
+          <div class="title">Framed city oil painting</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Ninja indoor grill" data-description="Ninja countertop indoor grill with air crisp, roast, and bake functions—great for quick weeknight meals without firing up the full-size oven. Simple digital controls and multiple temperature settings make it easy to grill, air fry, or roast right on the counter. A solid upgrade for anyone wanting versatile cooking in a compact footprint.">
+          <div class="image"><img src="media/items/a7c9f67f-3364-479f-bb1a-51efd56a1fd0.webp" alt="Ninja indoor grill" loading="lazy" decoding="async" /></div>
+          <div class="title">Ninja indoor grill</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Ridgeway mantel clock" data-description="Classic Ridgeway mantel clock in a rich cherry-toned wooden case with brass handle and decorative corner mounts. The elegant Roman numeral dial and traditional styling make it a great accent for a mantel, sideboard, or office. A handsome, traditional piece that adds both charm and function to any room.">
+          <div class="image"><img src="media/items/ed3f9f6e-a98d-4b0f-b7bc-23e1a450f39e.webp" alt="Ridgeway mantel clock" loading="lazy" decoding="async" /></div>
+          <div class="title">Ridgeway mantel clock</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="White wicker loveseat" data-description="Charming white wicker loveseat with a soft light blue cushion, perfect for a sunroom, bedroom sitting area, or covered porch. The curved back and airy woven sides give it a cozy cottage feel while keeping the footprint compact. Pair it with a small side table for a sweet reading nook or use it as extra seating in a guest room.">
+          <div class="image"><img src="media/items/d697cb36-883d-488e-9d1c-5b4c8b2a5892.webp" alt="White wicker loveseat" loading="lazy" decoding="async" /></div>
+          <div class="title">White wicker loveseat</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Queen Anne end table" data-description="Classic Queen Anne style end table with a warm medium‑dark wood finish, cabriole legs, and a single drawer with brass‑tone hardware. The fitted glass top protects the wood surface, making it perfect next to a sofa or chair for a lamp, books, or drinks. A timeless traditional look that blends easily with most living room décor.">
+          <div class="image"><img src="media/items/56cef6ff-82c9-4e58-98fb-db3128530574.webp" alt="Queen Anne end table" loading="lazy" decoding="async" /></div>
+          <div class="title">Queen Anne end table</div>
+        </button>
+      
+        <button class="card" data-category="Collectables" data-title="Waterbury Radnor mantel clock" data-description="Antique Waterbury &quot;Radnor&quot; mantel clock with its original paper labels still attached on the back. A classic American clock from the Waterbury Clock Company, this piece is ideal for collectors or anyone looking to add authentic late 19th–early 20th century charm to a room. With its original directions label and model label present, it has great period character and display appeal, especially once cleaned and set up on a mantel or shelf.">
+          <div class="image"><img src="media/items/913f06a9-4670-4764-88e1-ed417f9c4c2a.webp" alt="Waterbury Radnor mantel clock" loading="lazy" decoding="async" /></div>
+          <div class="title">Waterbury Radnor mantel clock</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Vintage metal patio glider" data-description="Charming vintage white metal patio glider chair with classic mesh seat and back, perfect for a front porch or garden seating area. The decorative scroll and leaf details on the top rail and arms give it a timeless cottage look, and the gliding base offers a smooth, relaxing motion. A great piece for someone who enjoys vintage outdoor furniture and doesn’t mind a bit of touch-up paint or light restoration.">
+          <div class="image"><img src="media/items/6382c534-96ce-4303-9f56-5d9a18cce7f4.webp" alt="Vintage metal patio glider" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage metal patio glider</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Vintage wooden bed parts" data-description="Vintage wooden bed frame pieces with classic paneled and scalloped details, ideal for restoration or a creative repurposing project. The headboard and footboard have a traditional look that would suit a farmhouse, cottage, or rustic decor once cleaned up and refinished. Great for DIYers looking for solid old wood and character at a bargain price.">
+          <div class="image"><img src="media/items/ceb52d33-f065-4502-b868-77920367469c.webp" alt="Vintage wooden bed parts" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage wooden bed parts</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Wicker loveseat bench" data-description="Charming cream-colored wicker loveseat with a soft green cushion, perfect for a sunroom, breakfast nook, or covered porch. Its light, airy design pairs easily with floral or cottage-style decor and offers a cozy spot for reading or relaxing by a window.">
+          <div class="image"><img src="media/items/60879e6d-15c0-431d-b87f-f96cc01f2b7d.webp" alt="Wicker loveseat bench" loading="lazy" decoding="async" /></div>
+          <div class="title">Wicker loveseat bench</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Wicker loveseat bench" data-description="Charming white wicker loveseat with a soft green cushion, perfect for a sunroom, bedroom, or covered porch. The curved back and airy woven design give it a light, cottage-style look that pairs well with floral or coastal decor. A nice accent seating piece that doesn’t take up too much space but still seats two comfortably.">
+          <div class="image"><img src="media/items/5e7123eb-b3bf-440e-98dd-5511686c2547.webp" alt="Wicker loveseat bench" loading="lazy" decoding="async" /></div>
+          <div class="title">Wicker loveseat bench</div>
+        </button>
+      
+        <button class="card" data-category="Outdoor, Military &amp; Tactical Items" data-title="Tow-behind spike aerator" data-description="Handy tow-behind spike aerator for keeping a lawn healthy and reducing soil compaction. Hooks up to a riding mower or garden tractor and has a tray on top where you can add weight for deeper penetration. A solid, heavy-duty piece that still has plenty of life left for regular yard maintenance.">
+          <div class="image"><img src="media/items/795fdd84-c5a7-4793-82ab-e80f8927663b.webp" alt="Tow-behind spike aerator" loading="lazy" decoding="async" /></div>
+          <div class="title">Tow-behind spike aerator</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Dell black laptop" data-description="Dell laptop computer with a textured black lid, ideal as a basic spare machine, student computer, or for parts if you like to tinker with electronics. A solid name-brand PC that could still be useful for everyday tasks depending on its specs and condition.">
+          <div class="image"><img src="media/items/07aff0f9-4825-46e0-8e50-40fa37b4c67a.webp" alt="Dell black laptop" loading="lazy" decoding="async" /></div>
+          <div class="title">Dell black laptop</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Round drum side table" data-description="Classic round drum-style side table with elegant curved legs and claw feet, perfect beside a sofa or reading chair. The warm wood tone and traditional hardware give it a timeless look, and the compact footprint makes it easy to place in almost any room. A great piece if you like vintage furniture and don’t mind (or plan to refinish) some surface wear on the top.">
+          <div class="image"><img src="media/items/07ce0d80-ebcd-48e5-9c0e-f73db71ec052.webp" alt="Round drum side table" loading="lazy" decoding="async" /></div>
+          <div class="title">Round drum side table</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Silverplate tea set with tray" data-description="Elegant vintage silverplate tea and coffee service with matching handled tray, perfect for display or entertaining. The set includes multiple lidded pots and a creamer/sugar on an ornate footed tray with raised floral border and handles. With a good polish this would make a striking centerpiece on a dining room sideboard or buffet.">
+          <div class="image"><img src="media/items/6d4054fb-d996-48fe-b49a-045a8cc7e0af.webp" alt="Silverplate tea set with tray" loading="lazy" decoding="async" /></div>
+          <div class="title">Silverplate tea set with tray</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Mahogany oval end table" data-description="Classic oval mahogany-style end table with elegant cabriole legs and a fitted glass top to protect the wood. A great size next to a sofa or reading chair, with a warm finish that works well in traditional or transitional décor. Perfect for a lamp, books, or a drink table in the living room or bedroom.">
+          <div class="image"><img src="media/items/bede0ca2-3dc8-43ee-91c8-f7eceeebf06b.webp" alt="Mahogany oval end table" loading="lazy" decoding="async" /></div>
+          <div class="title">Mahogany oval end table</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Brass peacock fireplace screen" data-description="Elegant brass folding peacock fireplace screen with ornate base and handle, perfect as a decorative accent even if you no longer use a working fireplace. The fan blades fold in and out smoothly to create a dramatic display and can be closed for compact storage. A great way to add a bit of vintage charm and warm metallic shine to a living room or den.">
+          <div class="image"><img src="media/items/00be84ab-6460-4ace-8b44-f1a396b98ea4.webp" alt="Brass peacock fireplace screen" loading="lazy" decoding="async" /></div>
+          <div class="title">Brass peacock fireplace screen</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Shark upright vacuum" data-description="Reliable red Shark upright bagless vacuum with clear canister and hose, great for everyday cleaning on hard floors and carpets. A solid name-brand machine that should be an upgrade over many older vacuums and a nice find for a first apartment, rental, or backup cleaner.">
+          <div class="image"><img src="media/items/41133962-f409-45d2-8968-e5ae5863b329.webp" alt="Shark upright vacuum" loading="lazy" decoding="async" /></div>
+          <div class="title">Shark upright vacuum</div>
+        </button>
+      
+        <button class="card" data-category="Games and Media (Board Games, Video Games, Movies)" data-title="Star Wars and Marvel lot" data-description="Fun little Star Wars and Marvel bundle for the collector or fan. You get two vintage-style Kenner Star Wars Power of the Force action figures still on their cards, plus an original Marvel Star Wars comic and a Marvel Universe handbook comic. Great starter lot for a display shelf or to fill in a collection without breaking the bank.">
+          <div class="image"><img src="media/items/bcfc9d61-d003-437e-a9bb-b13326dba249.webp" alt="Star Wars and Marvel lot" loading="lazy" decoding="async" /></div>
+          <div class="title">Star Wars and Marvel lot</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Marble top side table" data-description="Charming small marble-top pedestal side table, perfect as an accent next to a chair or as a plant stand. The round white marble with gray veining pairs nicely with the warm wood base, adding a classic touch to almost any room. Compact size makes it easy to place in tight spaces or corners.">
+          <div class="image"><img src="media/items/9182f8b2-133b-4b88-9f4b-5eda2e7b87aa.webp" alt="Marble top side table" loading="lazy" decoding="async" /></div>
+          <div class="title">Marble top side table</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Framed landscape print" data-description="Large framed impressionist-style coastal landscape, featuring twisting trees overlooking a village and blue sea, presented in an ornate gold-toned frame. A striking, classic piece of wall decor that brings color and movement to a living room, hallway, or office. Ready to hang and perfect for anyone who loves traditional European scenery and impressionist art.">
+          <div class="image"><img src="media/items/481d66c9-3791-46fd-8121-b350213edd1d.webp" alt="Framed landscape print" loading="lazy" decoding="async" /></div>
+          <div class="title">Framed landscape print</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Framed Victorian-style print" data-description="Elegant framed Victorian-style interior scene featuring three women in period dress, one playing the violin while the others listen in a richly detailed room. The large print is set in an eye-catching dark wood frame with decorative cutouts and a beaded inner liner, making it a striking focal piece for a traditional living room, music room, or hallway.">
+          <div class="image"><img src="media/items/477a11e0-dec3-4d7a-b6b3-f1cda6db3332.webp" alt="Framed Victorian-style print" loading="lazy" decoding="async" /></div>
+          <div class="title">Framed Victorian-style print</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Framed cottage landscape print" data-description="Beautiful large cottage-and-river landscape in an ornate carved-look wood frame, perfect as a statement piece for a traditional living room, dining room, or hallway. The warm tones and detailed flowers along the water give it a classic, cozy English-country feel that works well with rich wall colors and vintage décor.">
+          <div class="image"><img src="media/items/d49709fc-c622-45ee-b7a7-89a6c0c57431.webp" alt="Framed cottage landscape print" loading="lazy" decoding="async" /></div>
+          <div class="title">Framed cottage landscape print</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Electric bill counter" data-description="Handy electric bill counter for quickly counting stacks of cash at garage sales, small businesses, or events. Simple push-button controls and a clear digital display make it easy to use, and the compact desktop size fits comfortably on a counter or desk. Great tool if you handle cash regularly and want to save time and reduce counting errors.">
+          <div class="image"><img src="media/items/afbb899d-2577-4827-91ba-7b3639a7eb96.webp" alt="Electric bill counter" loading="lazy" decoding="async" /></div>
+          <div class="title">Electric bill counter</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="HP OfficeJet Pro printer" data-description="HP OfficeJet Pro 6970 all-in-one printer with automatic document feeder and touchscreen control panel. Great for a home office, with copy, scan, and fax functions in one compact unit. A nice modern-looking machine that fits easily on a desk or credenza.">
+          <div class="image"><img src="media/items/5f7c1d53-f055-41f1-907d-134f90e81a40.webp" alt="HP OfficeJet Pro printer" loading="lazy" decoding="async" /></div>
+          <div class="title">HP OfficeJet Pro printer</div>
+        </button>
+      
+        <button class="card" data-category="Books, Manuals &amp; Paper Collections" data-title="1934 Army commission document" data-description="Original 1934 U.S. Army officer commission certificate, appointing a Second Lieutenant of Infantry under the authority of the President of the United States. A striking piece of interwar military history with bold eagle vignette, ornate typography, and period signatures, ideal for framing or adding to a World War II or U.S. Army paper collection.">
+          <div class="image"><img src="media/items/5018812f-e9af-4ce8-9176-51dd247b0c21.webp" alt="1934 Army commission document" loading="lazy" decoding="async" /></div>
+          <div class="title">1934 Army commission document</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="White porch rocker" data-description="Classic white wooden porch rocking chair with a slat back and contoured slat seat, perfect for relaxing on the front porch or patio. The rocker has a clean, traditional look that fits cottage, farmhouse, or coastal decor and appears sturdy and ready for everyday use.">
+          <div class="image"><img src="media/items/b2827f94-db79-4e00-bebf-7f9f40777553.webp" alt="White porch rocker" loading="lazy" decoding="async" /></div>
+          <div class="title">White porch rocker</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Ruishan digital scale" data-description="Ruishan digital countertop scale, ideal for kitchen, hobby, or light commercial use. Features a large stainless steel weighing platform and an easy-to-read digital control panel with multiple function buttons. A solid, modern scale for accurate weighing tasks around the home or small business.">
+          <div class="image"><img src="media/items/40cdb66a-1c67-4387-9747-eba2ab00a109.webp" alt="Ruishan digital scale" loading="lazy" decoding="async" /></div>
+          <div class="title">Ruishan digital scale</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="White wooden rocking chair" data-description="Classic white wooden rocking chair with a slat back and contoured seat, perfect for a porch, sunroom, or nursery. The rocker has a comfortably wide seat and traditional turned finials on the back posts, giving it a timeless country look. A bit of surface wear makes it a great candidate for a quick touch-up or repaint to match your decor.">
+          <div class="image"><img src="media/items/d61fd4cb-b31a-4927-9b39-10843d18b35d.webp" alt="White wooden rocking chair" loading="lazy" decoding="async" /></div>
+          <div class="title">White wooden rocking chair</div>
+        </button>
+      
+        <button class="card" data-category="Collectables" data-title="PL Limoges art plate" data-description="Beautiful hand-painted PL Limoges France porcelain plate featuring a rich Art Nouveau grape and leaf design with deep burgundy panels and heavy gold trim. Signed by the artist along the rim, this decorative plate makes a striking accent on a stand or in a china cabinet and is a lovely example of early 20th-century French porcelain artistry.">
+          <div class="image"><img src="media/items/63127d00-7772-4150-8f53-f37e428616fa.webp" alt="PL Limoges art plate" loading="lazy" decoding="async" /></div>
+          <div class="title">PL Limoges art plate</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Vintage cherub table lamp" data-description="Elegant vintage table lamp with a tall fluted column and ornate cherub-decorated base, finished in warm gold and cream tones. The classic pleated shade gives off a soft, inviting light, perfect for a traditional living room, bedroom, or study. A great accent piece if you like Old World or classical décor and want something more decorative than a standard modern lamp.">
+          <div class="image"><img src="media/items/d92772b6-bc27-442c-9976-b581b6d0dbf9.webp" alt="Vintage cherub table lamp" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage cherub table lamp</div>
+        </button>
+      
+        <button class="card" data-category="Collectables" data-title="Flying Racer snow sled" data-description="Classic wooden “Flying Racer” snow sled with bright red frame and bold lightning-bolt graphics, perfect for lodge, cabin, or winter décor. The wood has that great aged patina people look for, and the steering bar and pull rope are still present, giving it a nostalgic, ready-to-display look. Ideal to hang on a wall, lean by a fireplace, or use as a seasonal porch accent.">
+          <div class="image"><img src="media/items/9d752409-22bf-4adc-95de-2f58b88933fe.webp" alt="Flying Racer snow sled" loading="lazy" decoding="async" /></div>
+          <div class="title">Flying Racer snow sled</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Victorian child and dog print" data-description="Charming Victorian-style wall art featuring a young girl in a blue dress resting with a large St. Bernard dog in a lush woodland landscape. The richly detailed scene is set in an ornate gold-tone frame that adds classic, old-world character and makes this a ready-to-hang accent for a traditional or cottage-style room.">
+          <div class="image"><img src="media/items/1b62500f-53f1-4abb-86c8-a928624a7d39.webp" alt="Victorian child and dog print" loading="lazy" decoding="async" /></div>
+          <div class="title">Victorian child and dog print</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Framed fox hunting print" data-description="Classic fox-hunting scene in rich autumn colors, beautifully presented with a deep burgundy mat and ornate gold frame. This large piece has great traditional English country-house style and is ready to hang as a focal point over a sofa, sideboard, or in a study or den.">
+          <div class="image"><img src="media/items/e7a96707-67e0-4d2f-8ac8-7104d5255782.webp" alt="Framed fox hunting print" loading="lazy" decoding="async" /></div>
+          <div class="title">Framed fox hunting print</div>
+        </button>
+      
+        <button class="card" data-category="Tools &amp; Hobby Equipment" data-title="Burdisso hoof trimmer" data-description="Heavy-duty Burdisso hoof trimmer made in Italy, a quality farrier-style tool built for serious livestock or equine care. Solid metal construction with comfortable handles makes this a great upgrade from cheaper modern versions or a handy backup for the barn or trailer.">
+          <div class="image"><img src="media/items/d09f7ac1-4a41-4058-ad48-b8add24bf167.webp" alt="Burdisso hoof trimmer" loading="lazy" decoding="async" /></div>
+          <div class="title">Burdisso hoof trimmer</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Medtronic MyCareLink Monitor" data-description="Medtronic Reveal LINQ MyCareLink home monitor with original box, ideal for someone needing a replacement base unit or parts. The unit appears lightly used and includes the main monitor and power cord as shown. Great opportunity for a technician, reseller, or clinic looking for a backup device at a fraction of new cost.">
+          <div class="image"><img src="media/items/f29ec699-b297-4135-9d1e-be882f476ea4.webp" alt="Medtronic MyCareLink Monitor" loading="lazy" decoding="async" /></div>
+          <div class="title">Medtronic MyCareLink Monitor</div>
+        </button>
+      
+        <button class="card" data-category="Outdoor, Military &amp; Tactical Items" data-title="White garden urn planter" data-description="Classic white pedestal garden urn planter, perfect for framing an entryway or adding height to your porch or patio plantings. Its traditional fluted bowl and square base give it a timeless look that works with many home styles, and it’s already weathered for outdoor use. Just add your favorite flowers or greenery and it’s ready to go.">
+          <div class="image"><img src="media/items/3caaaf58-13ec-4300-88b8-c3a794758a2d.webp" alt="White garden urn planter" loading="lazy" decoding="async" /></div>
+          <div class="title">White garden urn planter</div>
+        </button>
+      
+        <button class="card" data-category="Clothing and Linens" data-title="Dooney Bourke orange hobo" data-description="Brighten up your wardrobe with this orange Dooney &amp; Bourke leather hobo bag. The soft pebbled leather, braided strap detail, and handy exterior zip pocket make it a great everyday carry, while the dark interior lining with DB monogram adds that classic designer touch. A fun pop of color that still feels practical and easy to wear.">
+          <div class="image"><img src="media/items/c5b6391e-1c4a-4967-a279-a850b625800d.webp" alt="Dooney Bourke orange hobo" loading="lazy" decoding="async" /></div>
+          <div class="title">Dooney Bourke orange hobo</div>
+        </button>
+      
+        <button class="card" data-category="Clothing and Linens" data-title="Michael Kors black hobo" data-description="Classic black Michael Kors pebbled leather hobo bag, perfect for everyday use. The soft, slouchy shape and neutral color make it an easy match with almost any outfit, while the gold-tone logo detail adds a touch of designer polish. A great grab-and-go purse with plenty of style for work, errands, or travel.">
+          <div class="image"><img src="media/items/e046d84f-617a-4996-8744-d2fdb2d701dc.webp" alt="Michael Kors black hobo" loading="lazy" decoding="async" /></div>
+          <div class="title">Michael Kors black hobo</div>
+        </button>
+      
+        <button class="card" data-category="Clothing and Linens" data-title="Kate Spade beige tote" data-description="Chic and versatile Kate Spade beige saffiano leather tote, perfect for everyday use or the office. The structured shape, double handles, and neutral color make it an easy match with almost any outfit while still feeling polished and designer. A great way to add a quality name-brand bag to your wardrobe at a fraction of retail.">
+          <div class="image"><img src="media/items/4dbc1cb9-892f-41c2-8eda-7996a721dcdb.webp" alt="Kate Spade beige tote" loading="lazy" decoding="async" /></div>
+          <div class="title">Kate Spade beige tote</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Scanpan roasting pan" data-description="High-quality Scanpan nonstick roasting pan, perfect for everyday oven use, casseroles, and roasting meats or vegetables. The heavy construction and slick interior make for even cooking and easy cleanup, and the generous rectangular shape gives you plenty of room for family meals or batch cooking.">
+          <div class="image"><img src="media/items/ebbf1a50-93de-4a9f-961f-93d65db40c15.webp" alt="Scanpan roasting pan" loading="lazy" decoding="async" /></div>
+          <div class="title">Scanpan roasting pan</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Carved wood plant stand" data-description="Elegant carved wooden plant stand with lush faux greenery, perfect for adding height and texture to a corner or entryway without the maintenance of a live plant. The rich reddish-brown finish and curved legs give it a classic, traditional look that works well with formal or transitional décor.">
+          <div class="image"><img src="media/items/cb453f57-bc2e-42c6-b056-d4daaa0006b1.webp" alt="Carved wood plant stand" loading="lazy" decoding="async" /></div>
+          <div class="title">Carved wood plant stand</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Vintage framed parlor print" data-description="Elegant vintage framed parlor scene, featuring finely dressed ladies in a richly detailed interior with a violinist and sunlit garden beyond. The ornate metal frame and muted, old-world colors make this a great statement piece for a traditional living room, music room, or hallway. Ready to hang and add instant character to your wall.">
+          <div class="image"><img src="media/items/9720be01-52b4-4bbc-91d0-e3144fa010d8.webp" alt="Vintage framed parlor print" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage framed parlor print</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="LED blossom floor tree" data-description="Striking LED blossom floor tree that adds a warm, whimsical glow to any room. The numerous yellow flower lights create a dramatic accent in a corner, by a window, or behind a chair, perfect for ambient lighting or seasonal decor.">
+          <div class="image"><img src="media/items/a3a6f2af-e33a-43ad-986c-7f6ed928788b.webp" alt="LED blossom floor tree" loading="lazy" decoding="async" /></div>
+          <div class="title">LED blossom floor tree</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Waterfall photo print" data-description="Beautiful large-format waterfall landscape photograph, perfect for adding a calming, nature-inspired focal point to any room. The long-exposure effect gives the falling water a soft, misty look against lush green cliffs, making it a striking piece of wall decor for living rooms, offices, or bedrooms.">
+          <div class="image"><img src="media/items/e207e340-e352-4e25-a1f4-ae28720cf4e9.webp" alt="Waterfall photo print" loading="lazy" decoding="async" /></div>
+          <div class="title">Waterfall photo print</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Apple iPad mini 2" data-description="Apple iPad mini 2 in white, a compact tablet that’s great for web browsing, email, streaming, and simple apps. Perfect size for travel, kids, or as a handy couch companion. Clean screen and ready to be reset for a new owner. Bring your own Lightning cable and charger and you’re set.">
+          <div class="image"><img src="media/items/54465686-c216-4261-a9e3-5974545f63d6.webp" alt="Apple iPad mini 2" loading="lazy" decoding="async" /></div>
+          <div class="title">Apple iPad mini 2</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Niimbot label printer" data-description="Handy Niimbot portable thermal label printer in a compact zip case, complete with several rolls of label tape so it is ready to use. Great for organizing bins, files, kitchen containers, or pricing items for your own sales, and it pairs with a phone app for easy custom labels and barcodes.">
+          <div class="image"><img src="media/items/b13aa370-ae92-4056-a28c-7a744fc9fded.webp" alt="Niimbot label printer" loading="lazy" decoding="async" /></div>
+          <div class="title">Niimbot label printer</div>
+        </button>
+      
+        <button class="card" data-category="Tools &amp; Hobby Equipment" data-title="Burdizzo castrator tool" data-description="Heavy-duty Burdizzo livestock castrator made in Italy, a classic farm and ranch tool known for its solid construction and reliability. Great for a working farm, ranch collection, or as an unusual vintage agricultural piece for display.">
+          <div class="image"><img src="media/items/8ea9d2a2-9f82-4cbe-8db2-2e4dccc9f316.webp" alt="Burdizzo castrator tool" loading="lazy" decoding="async" /></div>
+          <div class="title">Burdizzo castrator tool</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Panasonic OmniMovie camcorder" data-description="Vintage Panasonic OmniMovie VHS HQ camcorder in its fitted hard case, complete with manuals and accessories, perfect for a retro video enthusiast, prop use, or display. A classic shoulder-style VHS camera from the early home-video era with great nostalgic appeal.">
+          <div class="image"><img src="media/items/f97e39d3-70b0-4d47-aa54-7c9252f9199e.webp" alt="Panasonic OmniMovie camcorder" loading="lazy" decoding="async" /></div>
+          <div class="title">Panasonic OmniMovie camcorder</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Sony MVC-CD250 camera" data-description="Fun throwback Sony MVC-CD250 Mavica digital camera, complete in its original box with strap and paperwork. A great piece for collectors of early digital photography or anyone who wants a quirky CD-based camera to experiment with and display.">
+          <div class="image"><img src="media/items/64bdfc55-08ec-4a76-b383-a6816a01a97d.webp" alt="Sony MVC-CD250 camera" loading="lazy" decoding="async" /></div>
+          <div class="title">Sony MVC-CD250 camera</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="MoistAIR console humidifier" data-description="MoistAIR console-style humidifier, great for adding comfortable moisture to a larger room or small home area. Features digital controls for speed and humidity, with front grille access and a built-in water reservoir. Ideal for dry winter air or anyone wanting a more comfortable indoor environment without buying new.">
+          <div class="image"><img src="media/items/9e332ef7-9920-4692-9928-f0c6d88a2b6b.webp" alt="MoistAIR console humidifier" loading="lazy" decoding="async" /></div>
+          <div class="title">MoistAIR console humidifier</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Neoclassical cherub table lamp" data-description="Elegant neoclassical-style table lamp with a tall fluted column and ornate gold-tone base featuring cherub figures on each side. This piece adds a touch of Old World charm to a bedroom, living room, or entry table and pairs nicely with traditional or vintage décor. A great accent lamp if you like classical motifs and warm, antique-style finishes.">
+          <div class="image"><img src="media/items/f11c139e-382b-4790-b0f7-7d2485babc7c.webp" alt="Neoclassical cherub table lamp" loading="lazy" decoding="async" /></div>
+          <div class="title">Neoclassical cherub table lamp</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Oval framed portrait" data-description="Handsome oval portrait of a young nobleman set in a richly detailed gilt frame, perfect for adding a touch of Old World charm to a hallway, study, or gallery wall. The ornate floral and beaded surround gives it a classic European look and makes it a strong decorative accent even if you simply love the frame itself.">
+          <div class="image"><img src="media/items/bc56137c-21e1-49c1-bcf5-468164f1560e.webp" alt="Oval framed portrait" loading="lazy" decoding="async" /></div>
+          <div class="title">Oval framed portrait</div>
+        </button>
+      
+        <button class="card" data-category="Collectables" data-title="Kodak No. 3A camera" data-description="Classic Kodak No. 3A Autographic folding camera, a great display piece for any vintage photography or industrial décor collection. The black leatherette body, brass accents, and detailed faceplate graphics give it a striking early-20th-century look, whether you’re a camera enthusiast or just want a unique conversation starter.">
+          <div class="image"><img src="media/items/487341a6-561a-4e80-b670-12d691df5062.webp" alt="Kodak No. 3A camera" loading="lazy" decoding="async" /></div>
+          <div class="title">Kodak No. 3A camera</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Laguiole-style steak knives" data-description="Handsome set of curved-handle steak knives in the classic French Laguiole style, with creamy faux-ivory handles and mixed brass and stainless bolsters. Several knives show age and patina, giving them a charming, well-loved look that works nicely for rustic table settings or as a decorative accent in a French country kitchen.">
+          <div class="image"><img src="media/items/4c31a9ec-d0fc-436e-866f-0595a0c1e43a.webp" alt="Laguiole-style steak knives" loading="lazy" decoding="async" /></div>
+          <div class="title">Laguiole-style steak knives</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Framed magnolia botanical print" data-description="Elegant framed magnolia botanical print, beautifully matted and set in a classic gold-tone frame. This large piece adds a refined, traditional touch to a living room, dining room, or bedroom and works well with Southern, cottage, or classic decor. Ready to hang and enjoy as a statement floral artwork.">
+          <div class="image"><img src="media/items/9514f92e-545d-4d5d-b0cc-bc5741be0950.webp" alt="Framed magnolia botanical print" loading="lazy" decoding="async" /></div>
+          <div class="title">Framed magnolia botanical print</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Ceramic canister set" data-description="Elegant three-piece ceramic kitchen canister set with ornate metal bases and finial lids, perfect for adding a touch of French-inspired style to a countertop. The neutral cream color works with many decor styles, and the graduated sizes are great for storing dry goods or using as decorative accents.">
+          <div class="image"><img src="media/items/199fb62d-66b3-43d5-a4fb-206b8a040d94.webp" alt="Ceramic canister set" loading="lazy" decoding="async" /></div>
+          <div class="title">Ceramic canister set</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Tom Caldwell cottage print" data-description="Charming framed Tom Caldwell cottage print with warm stone walls, ivy, and flowers, presented in a rich double mat and ornate dark frame that makes it ready to hang in a living room, hallway, or study. The neutral tones and classic architecture scene blend easily with traditional or rustic décor while adding a touch of European village charm.">
+          <div class="image"><img src="media/items/99e068e4-7489-4523-b05d-2196ef706b05.webp" alt="Tom Caldwell cottage print" loading="lazy" decoding="async" /></div>
+          <div class="title">Tom Caldwell cottage print</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Sony CFD-S70 boombox" data-description="Sony CFD-S70 portable CD/cassette/radio boombox with built-in speakers and carry handle. A handy all-in-one unit for playing CDs, old mixtapes, or listening to FM/AM radio around the house, in the garage, or on the patio. Compact, easy to move, and still a very popular model for everyday listening.">
+          <div class="image"><img src="media/items/10efe791-949c-44dc-9e61-3e5c8fef8e04.webp" alt="Sony CFD-S70 boombox" loading="lazy" decoding="async" /></div>
+          <div class="title">Sony CFD-S70 boombox</div>
+        </button>
+      
+        <button class="card" data-category="Tools &amp; Hobby Equipment" data-title="Ideal Band Castrator" data-description="Vintage Ideal band castrator with original Franklin Serum Co. packaging and instructions, a great piece for farm tool collectors or as a conversation-starting display from the days of hands-on livestock care. Solid metal construction with spring action still intact makes it an authentic example of mid-century agricultural equipment.">
+          <div class="image"><img src="media/items/b22c8c18-7b59-45f6-84e5-1de9b76675b6.webp" alt="Ideal Band Castrator" loading="lazy" decoding="async" /></div>
+          <div class="title">Ideal Band Castrator</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="White pedestal urn planter" data-description="Classic white pedestal urn planter with lush faux greenery, perfect for flanking a front door, porch, or patio. The traditional design adds instant curb appeal without the maintenance of live plants, and the neutral white finish works with many exterior styles.">
+          <div class="image"><img src="media/items/2e28d1c2-621b-44b5-9a7e-a42554f6eff8.webp" alt="White pedestal urn planter" loading="lazy" decoding="async" /></div>
+          <div class="title">White pedestal urn planter</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Beige floral area rug" data-description="Classic beige floral area rug or runner with a traditional border design, perfect for adding warmth to a hallway, entry, or small sitting area. The neutral palette with soft reds and greens works well with many décor styles and can help soften a hard floor in a basement, den, or spare room.">
+          <div class="image"><img src="media/items/1ac9b44d-06e9-445a-a899-426980234e85.webp" alt="Beige floral area rug" loading="lazy" decoding="async" /></div>
+          <div class="title">Beige floral area rug</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Framed children art print" data-description="Charming large framed print of two Victorian-era children, beautifully matted and set in a dark wood-tone frame. This sweet, nostalgic scene adds a warm, traditional touch to a bedroom, hallway, or nursery and is ready to hang with no extra framing needed.">
+          <div class="image"><img src="media/items/d51f397d-7ebc-422d-9688-6c258e55b597.webp" alt="Framed children art print" loading="lazy" decoding="async" /></div>
+          <div class="title">Framed children art print</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Cut glass table lamp" data-description="Pretty cut-glass table lamp with a classic pleated white shade, perfect for adding sparkle to a bedroom, hallway, or living room. The rounded glass base with floral and geometric patterning catches the light nicely, and the neutral shade works with almost any décor style from traditional to cottage. A nice accent piece that feels a bit more special than a standard lamp.">
+          <div class="image"><img src="media/items/da4ed5fd-fae0-41f8-b656-f83ea05921d0.webp" alt="Cut glass table lamp" loading="lazy" decoding="async" /></div>
+          <div class="title">Cut glass table lamp</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Sony MVC-CD250 camera" data-description="Sony MVC-CD250 CD Mavica digital camera with original box and Sony neck strap. Classic early-2000s digital camera that records photos directly to mini CD media, great for collectors, tech enthusiasts, or as a nostalgic display piece. Appears clean and well cared for with lens cap in place.">
+          <div class="image"><img src="media/items/a25d3fae-57f0-4176-9448-8aa418f34412.webp" alt="Sony MVC-CD250 camera" loading="lazy" decoding="async" /></div>
+          <div class="title">Sony MVC-CD250 camera</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Framed religious art print" data-description="Large framed religious wall art featuring a woman kneeling in prayer before a dramatic mountain and valley landscape. Soft colors and a serene, inspirational scene make this a nice focal piece for a bedroom, hallway, or devotional space. The vintage frame has some wear but still presents well for display.">
+          <div class="image"><img src="media/items/ba393a75-17a3-4fa4-ab40-dfaffe69fc1a.webp" alt="Framed religious art print" loading="lazy" decoding="async" /></div>
+          <div class="title">Framed religious art print</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Vintage wicker chair" data-description="Charming vintage white wicker armchair that brings a cottage or sunroom feel to any space. The woven back and arms have a classic look, and with a fresh cushion or light touch-up, it could make a cozy reading or accent chair.">
+          <div class="image"><img src="media/items/1f0d828a-7b34-4ffc-9b6b-6e756a040df4.webp" alt="Vintage wicker chair" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage wicker chair</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="SentrySafe lock box" data-description="Secure your valuables with this SentrySafe portable electronic lock box, featuring a digital keypad and backup key access. Great for cash, documents, jewelry, or small electronics, and easy to carry or store in a closet or drawer.">
+          <div class="image"><img src="media/items/58b14296-dfc2-4b41-96e4-06679966c369.webp" alt="SentrySafe lock box" loading="lazy" decoding="async" /></div>
+          <div class="title">SentrySafe lock box</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Framed fashion print" data-description="Charming framed fashion print titled &quot;La Mode Illustrée,&quot; featuring two elegantly dressed ladies in a garden setting. The ornate gold-tone frame with deep relief scrollwork gives it a rich Victorian look, perfect for a dressing room, bedroom, or vintage-inspired gallery wall. A lovely accent piece for anyone who loves historical fashion and classic French style.">
+          <div class="image"><img src="media/items/715bbd62-317c-4486-bc4d-6645914977c6.webp" alt="Framed fashion print" loading="lazy" decoding="async" /></div>
+          <div class="title">Framed fashion print</div>
+        </button>
+      
+        <button class="card" data-category="Fitness and Sports" data-title="Sportcraft croquet set" data-description="Fun backyard Sportcraft croquet set neatly stored in a zippered carry bag with mesh front. A great pick for family gatherings, picnics, or casual lawn games, and easy to grab and go with the built-in handle. Perfect for adding a classic outdoor game to your summer lineup.">
+          <div class="image"><img src="media/items/87188e00-9f69-40a4-b1fb-cf6181863c6e.webp" alt="Sportcraft croquet set" loading="lazy" decoding="async" /></div>
+          <div class="title">Sportcraft croquet set</div>
+        </button>
+      
+        <button class="card" data-category="Clothing and Linens" data-title="Bernie Mev woven sneakers" data-description="Comfort meets style with these Bernie Mev woven slip-on sneakers, featuring the brand’s signature stretchy basket-weave upper and cushioned sole for all-day wear. Great for travel, errands, or casual outfits, they come in their original box and appear barely, if ever, worn.">
+          <div class="image"><img src="media/items/c79f6a3d-3376-4595-ab31-f162c79a8d36.webp" alt="Bernie Mev woven sneakers" loading="lazy" decoding="async" /></div>
+          <div class="title">Bernie Mev woven sneakers</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Lasko ceramic heater" data-description="Lasko oscillating ceramic space heater with digital controls, ideal for adding quick, focused warmth to a bedroom, office, or living area. The slim tower design saves floor space while the oscillation helps distribute heat more evenly around the room. A trusted brand in home comfort, this heater offers modern convenience in a compact package.">
+          <div class="image"><img src="media/items/90bd5c13-fe14-40c2-9b5e-b5a5a4b7a72c.webp" alt="Lasko ceramic heater" loading="lazy" decoding="async" /></div>
+          <div class="title">Lasko ceramic heater</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Lasko ceramic tower heater" data-description="Lasko ceramic tower space heater with digital controls and remote-ready design, ideal for adding quick warmth to a bedroom, office, or living area. Compact and modern-looking, it fits easily in a corner while providing focused heat where you need it most.">
+          <div class="image"><img src="media/items/94461a30-85b1-426a-8bc3-bb7126071b8b.webp" alt="Lasko ceramic tower heater" loading="lazy" decoding="async" /></div>
+          <div class="title">Lasko ceramic tower heater</div>
+        </button>
+      
+        <button class="card" data-category="Clothing and Linens" data-title="Kate Spade red wallet" data-description="Chic matching red Kate Spade wallets, perfect for everyday use or gifting. The bold color and gold-tone hardware give a polished designer look, and the compact size is ideal for slipping into a handbag or tote. A stylish way to upgrade your daily carry with recognizable brand appeal.">
+          <div class="image"><img src="media/items/b7caa669-f0e4-4279-ae59-863bac9a4d37.webp" alt="Kate Spade red wallet" loading="lazy" decoding="async" /></div>
+          <div class="title">Kate Spade red wallet</div>
+        </button>
+      
+        <button class="card" data-category="Tools &amp; Hobby Equipment" data-title="Swingline 390 stapler" data-description="Swingline 390 heavy duty stapler, ideal for home office, classroom, or small business use. Known for its durable all-metal mechanism and reliable performance, this stapler is built to handle larger stacks of paper than a standard desk stapler. A solid, workhorse office tool from a trusted brand.">
+          <div class="image"><img src="media/items/8284f463-e182-446f-b514-8a4b568d76d3.webp" alt="Swingline 390 stapler" loading="lazy" decoding="async" /></div>
+          <div class="title">Swingline 390 stapler</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Red cast iron Dutch oven" data-description="Sturdy red enameled cast iron Dutch oven with matching lid and stainless knob, perfect for soups, stews, and braising. The bold color looks great on the stovetop or table, and the heavy construction should hold heat well for slow cooking and entertaining.">
+          <div class="image"><img src="media/items/62695a5d-c92f-4b21-aaf7-a7e1dfd8da4e.webp" alt="Red cast iron Dutch oven" loading="lazy" decoding="async" /></div>
+          <div class="title">Red cast iron Dutch oven</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Tom Caldwell framed print" data-description="Handsome Tom Caldwell architectural scene print in an ornate carved frame, perfect for adding a touch of European charm to a hallway, dining room, or study. The muted colors, double matting, and substantial frame give it a refined, gallery-style look that works well with traditional or transitional decor.">
+          <div class="image"><img src="media/items/a0a2a379-39f4-4e72-9013-c6b186ce9b7d.webp" alt="Tom Caldwell framed print" loading="lazy" decoding="async" /></div>
+          <div class="title">Tom Caldwell framed print</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Power Cooker pressure cooker" data-description="Power Cooker 8-in-1 digital pressure cooker, 6-quart size, great for fast weeknight meals or batch cooking. Versatile design works as a pressure cooker, slow cooker, rice cooker, steamer, and more, with easy push-button controls and a stainless-look exterior that fits most kitchens.">
+          <div class="image"><img src="media/items/8be93439-6ed7-4667-aaa9-9aa57017c142.webp" alt="Power Cooker pressure cooker" loading="lazy" decoding="async" /></div>
+          <div class="title">Power Cooker pressure cooker</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Ornate framed wall decor" data-description="Large, ornate framed wall piece with rich bronze-brown finish and intricate scrollwork center medallion. This baroque-style accent adds a classic, upscale touch over a console, in a hallway, or as part of a gallery wall. A great statement piece if you like traditional or Old World decor.">
+          <div class="image"><img src="media/items/c8c0692c-0b7c-4e48-ba35-d570b4ae3de3.webp" alt="Ornate framed wall decor" loading="lazy" decoding="async" /></div>
+          <div class="title">Ornate framed wall decor</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Keurig single-serve brewer" data-description="Clean white Keurig single-serve coffee maker, perfect for quick morning cups without taking up much counter space. Its compact footprint and simple push-button controls make it ideal for a small kitchen, office, or guest room coffee station.">
+          <div class="image"><img src="media/items/6e4a604c-ab29-4777-87a3-07953cc19d15.webp" alt="Keurig single-serve brewer" loading="lazy" decoding="async" /></div>
+          <div class="title">Keurig single-serve brewer</div>
+        </button>
+      
+        <button class="card" data-category="Outdoor, Military &amp; Tactical Items" data-title="Industrial lawn edging rolls" data-description="Handy mixed lot for outdoor and shop projects, including two large rolls of industrial lawn edging and a group of fluorescent light tubes in original cartons. Ideal for a DIYer, landscaper, or someone outfitting a workshop on a budget.">
+          <div class="image"><img src="media/items/75a633f5-c678-4a50-8098-c38003e96d79.webp" alt="Industrial lawn edging rolls" loading="lazy" decoding="async" /></div>
+          <div class="title">Industrial lawn edging rolls</div>
+        </button>
+      
+        <button class="card" data-category="Tools &amp; Hobby Equipment" data-title="Wagner Power Roller Pro" data-description="Wagner Power Quick Touch Roller Pro painting system in original box. A handy powered roller kit designed to deliver fast, even coverage and cut down on time spent refilling trays. Great for DIY interior painting projects if you want a step up from basic rollers.">
+          <div class="image"><img src="media/items/72b661e0-d006-4241-aaa0-8c054a22433c.webp" alt="Wagner Power Roller Pro" loading="lazy" decoding="async" /></div>
+          <div class="title">Wagner Power Roller Pro</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Walker pottery bowl" data-description="Attractive signed studio pottery bowl in a soft blue glaze, marked &quot;Walker 13&quot; on the base. A nice handmade accent piece that would work well as a decorative centerpiece or functional serving bowl in a modern or rustic kitchen.">
+          <div class="image"><img src="media/items/56d6931c-a063-4f08-b1eb-00c59fc48872.webp" alt="Walker pottery bowl" loading="lazy" decoding="async" /></div>
+          <div class="title">Walker pottery bowl</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="MoistAIR console humidifier" data-description="MoistAIR digital console humidifier with front wick filter and simple push-button controls. A solid choice for adding moisture to a bedroom or living area during dry seasons. Great for improving comfort, helping with dry skin, and protecting wood furniture and instruments from low humidity.">
+          <div class="image"><img src="media/items/ccf3775d-3aeb-4280-ae13-ef1ed8cf0fdf.webp" alt="MoistAIR console humidifier" loading="lazy" decoding="async" /></div>
+          <div class="title">MoistAIR console humidifier</div>
+        </button>
+      
+        <button class="card" data-category="Furniture" data-title="Wicker child rocker" data-description="Charming little wicker child’s rocking chair, perfect as a nursery accent or for displaying a favorite doll or stuffed animal. The light woven frame and soft green cushion give it a sweet, cottage-style look that works well in a child’s room, reading nook, or as a decorative piece in a sunroom.">
+          <div class="image"><img src="media/items/f8bbb4d3-d855-498d-a598-243aefc7d72e.webp" alt="Wicker child rocker" loading="lazy" decoding="async" /></div>
+          <div class="title">Wicker child rocker</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="SunTouchPlus light therapy lamp" data-description="SunTouchPlus light therapy lamp, great for adding bright, daylight-balanced light to your workspace or for seasonal light therapy. Compact, lightweight, and easy to place on a desk or table, with a simple plug-in design that’s ready to use.">
+          <div class="image"><img src="media/items/79710579-203c-4f51-8166-88453c6429e2.webp" alt="SunTouchPlus light therapy lamp" loading="lazy" decoding="async" /></div>
+          <div class="title">SunTouchPlus light therapy lamp</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Res-Q fire escape ladder" data-description="Be prepared with this Res-Q 15-foot emergency escape ladder, designed to turn almost any second-story window into a quick fire exit. A great safety addition for bedrooms or upstairs living areas, it comes in its original box and is ready to be checked and staged near a window for peace of mind.">
+          <div class="image"><img src="media/items/b9121441-ce7d-4a43-8b7b-157b36bfeea1.webp" alt="Res-Q fire escape ladder" loading="lazy" decoding="async" /></div>
+          <div class="title">Res-Q fire escape ladder</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Floral ceramic table lamp" data-description="Pretty floral ceramic table lamp with a classic cream pleated shade, perfect for adding a soft, traditional touch to a bedroom or living room. The hand-painted style blue and green flowers and ornate metal base give it a timeless, cottage-inspired look that works well with many decor styles. Ready to plug in and use for extra light on a side table, nightstand, or entryway chest.">
+          <div class="image"><img src="media/items/1370c53b-09fd-45b1-ab78-cfc1692ad2e1.webp" alt="Floral ceramic table lamp" loading="lazy" decoding="async" /></div>
+          <div class="title">Floral ceramic table lamp</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Flawless beauty fridge" data-description="Keep your skincare cool and refreshing with this Finishing Touch FLAWLESS beauty fridge, perfect for serums, creams, and beauty tools. Compact and stylish with a chic white-and-gold look, it’s ideal for a vanity, bathroom counter, or dorm room.">
+          <div class="image"><img src="media/items/31132fc8-de90-4c3e-8320-9b33bfd9ce59.webp" alt="Flawless beauty fridge" loading="lazy" decoding="async" /></div>
+          <div class="title">Flawless beauty fridge</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Japanese silk landscape embroidery" data-description="Charming Japanese silk embroidery depicting a curved bridge over a stream, with traditional thatched houses and a distant mountain in soft misty tones. The fine stitched texture really catches the light and would look beautiful once properly framed. A nice accent for an Asian-inspired room, hallway, or small gallery wall.">
+          <div class="image"><img src="media/items/9c52998a-535c-49ec-8fe9-7acc9ca72101.webp" alt="Japanese silk landscape embroidery" loading="lazy" decoding="async" /></div>
+          <div class="title">Japanese silk landscape embroidery</div>
+        </button>
+      
+        <button class="card" data-category="Clothing and Linens" data-title="Kate Spade black tote" data-description="Classic black Kate Spade shoulder tote with a structured shape and zip top closure, perfect for everyday use or work. The neutral color and simple design make it easy to pair with almost any outfit, and the roomy interior should hold daily essentials with ease. Some exterior wear is present, so this is a great buy for someone who wants a designer bag they can use without worry.">
+          <div class="image"><img src="media/items/7113f62e-eca9-4d5e-83af-347d2ec742d0.webp" alt="Kate Spade black tote" loading="lazy" decoding="async" /></div>
+          <div class="title">Kate Spade black tote</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Sanyo stereo cassette player" data-description="Cool vintage Sanyo stereo auto-reverse cassette player, perfect for anyone who loves classic portable audio gear. A fun display piece for a retro setup or a potential daily driver for cassette fans once checked over. Great candidate for restoration or for adding some authentic 1980s style to your collection.">
+          <div class="image"><img src="media/items/301d5a99-a730-4e43-b63a-2ae58be7bb03.webp" alt="Sanyo stereo cassette player" loading="lazy" decoding="async" /></div>
+          <div class="title">Sanyo stereo cassette player</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Tom&#39;s glass peanut jar" data-description="Fun vintage-style Tom&#39;s glass peanut jar with bright red lid and classic red script graphics, currently filled with a mix of metal cookie cutters. Great as a nostalgic countertop canister, candy jar, or display piece in a retro kitchen, and the cutters give you an instant baking starter set.">
+          <div class="image"><img src="media/items/3cb93f32-4045-4536-8e69-f0d07e6a61df.webp" alt="Tom&#39;s glass peanut jar" loading="lazy" decoding="async" /></div>
+          <div class="title">Tom&#39;s glass peanut jar</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="White ceramic tureen" data-description="Elegant white ceramic covered tureen with matching underplate, featuring raised fruit and grape clusters on the sides and lid. A classic serving piece that works beautifully for soups, stews, or as a centerpiece on a sideboard or dining table. Its neutral white color blends easily with many china patterns and styles, from traditional to farmhouse.">
+          <div class="image"><img src="media/items/725919eb-4208-4246-913f-2d56af24c4c9.webp" alt="White ceramic tureen" loading="lazy" decoding="async" /></div>
+          <div class="title">White ceramic tureen</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Vintage silverplate coffee carafe" data-description="Elegant vintage glass coffee carafe with ornate silver-tone handle, band, lid, and matching silverplate tray. This makes a lovely serving piece for brunches, coffee bars, or as a decorative accent on a sideboard. The classic shape and decorative rim detail give it an old-world feel that pairs well with traditional or French country decor.">
+          <div class="image"><img src="media/items/0f749603-8d97-4099-b01f-94c5138d0f3b.webp" alt="Vintage silverplate coffee carafe" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage silverplate coffee carafe</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Amazon Echo Plus speaker" data-description="Amazon Echo Plus smart speaker in clean white fabric finish, ready to bring Alexa voice control, music streaming, and smart-home features to your space. A nice upgrade for adding hands-free music, news, and timers in the kitchen, office, or bedroom without spending new-retail prices.">
+          <div class="image"><img src="media/items/84a9bd18-fb75-4497-b00a-92984745512b.webp" alt="Amazon Echo Plus speaker" loading="lazy" decoding="async" /></div>
+          <div class="title">Amazon Echo Plus speaker</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Green pedestal planter" data-description="Attractive large green ceramic pedestal planter with a classic decorative relief pattern, perfect for a statement houseplant or as a stand-alone accent piece. Its substantial size and weight give it a quality feel that works well in traditional or eclectic decor.">
+          <div class="image"><img src="media/items/2f12c3e5-51a3-4e32-8277-fd461dc777f6.webp" alt="Green pedestal planter" loading="lazy" decoding="async" /></div>
+          <div class="title">Green pedestal planter</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Handmade stoneware plate" data-description="Charming octagonal stoneware plate with a whimsical bird and floral design in earthy browns, blues, and greens. The hand-painted look and textured glaze make it a great accent piece for a kitchen wall, hutch, or rustic dining display. A nice decorative plate for anyone who loves folk-art style pottery and warm, natural tones.">
+          <div class="image"><img src="media/items/0b58f439-b6d7-49c8-af7a-a2f61b7fc09f.webp" alt="Handmade stoneware plate" loading="lazy" decoding="async" /></div>
+          <div class="title">Handmade stoneware plate</div>
+        </button>
+      
+        <button class="card" data-category="Tools &amp; Hobby Equipment" data-title="Craftsman spray gun" data-description="Vintage Sears Craftsman heavy-duty general-purpose spray gun in its original box, great for small paint jobs, auto touch-ups, and furniture refinishing. A solid older Craftsman tool for someone who appreciates classic shop gear or wants an inexpensive spray gun to pair with a home compressor.">
+          <div class="image"><img src="media/items/6f58d9e3-b384-43ea-936e-1bc59da31a7c.webp" alt="Craftsman spray gun" loading="lazy" decoding="async" /></div>
+          <div class="title">Craftsman spray gun</div>
+        </button>
+      
+        <button class="card" data-category="Tools &amp; Hobby Equipment" data-title="Vintage block and tackle" data-description="Old-school block and tackle pulley with great rustic character, complete with aged metal hardware and thick rope. Perfect as a decorative accent in a farmhouse, barn, or industrial-style space, or to repurpose for light-duty lifting and display projects.">
+          <div class="image"><img src="media/items/4e2bd873-5fea-4c5f-aa22-da86e01ae931.webp" alt="Vintage block and tackle" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage block and tackle</div>
+        </button>
+      
+        <button class="card" data-category="Fitness and Sports" data-title="ZenSports aerobic step" data-description="Sturdy ZenSports aerobic step platform, great for home workouts, cardio routines, and strength training. The textured non-slip surface and wide platform make it a solid choice for fitness rooms, garages, or basements, and it stores easily when not in use.">
+          <div class="image"><img src="media/items/1da643c5-bd7e-42f7-a0fd-2935f07e7b6b.webp" alt="ZenSports aerobic step" loading="lazy" decoding="async" /></div>
+          <div class="title">ZenSports aerobic step</div>
+        </button>
+      
+        <button class="card" data-category="Collectables" data-title="vintage wooden white spindle doll bed" data-description="Charming vintage white wooden spindle doll bed, perfect for displaying a favorite doll or teddy bear in a nursery or guest room. The turned spindles and creamy painted finish give it a sweet cottage look, and it would be adorable with a little handmade mattress and bedding. Great for play, decor, or as a photo prop.">
+          <div class="image"><img src="media/items/450ee74a-0f8d-4aab-bf3f-f8194dcd3f74.webp" alt="vintage wooden white spindle doll bed" loading="lazy" decoding="async" /></div>
+          <div class="title">vintage wooden white spindle doll bed</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="Japanese couple art print" data-description="Elegant framed Japanese-style artwork depicting a couple walking under an umbrella in the rain, dressed in traditional robes with soft, muted colors. The bamboo-look frame and matting give it a classic Asian decor feel and make it ready to hang as an accent piece in a hallway, bedroom, or living room.">
+          <div class="image"><img src="media/items/7023e397-a04a-478b-b268-b7464d505f72.webp" alt="Japanese couple art print" loading="lazy" decoding="async" /></div>
+          <div class="title">Japanese couple art print</div>
+        </button>
+      
+        <button class="card" data-category="Collectables" data-title="Rococo musician wall plaque" data-description="Charming vintage-style wall plaque featuring a finely detailed 18th-century gentleman playing a lute or guitar, framed within an ornate rococo-style oval surround. The cream and gold frame contrasts nicely with the turquoise costume, making this a great accent piece for a traditional, French, or shabby-chic decor. Hang it in a hallway, music room, or bedroom for a touch of old-world romance and character.">
+          <div class="image"><img src="media/items/8aa064b8-c828-4899-80a7-f891a8544b37.webp" alt="Rococo musician wall plaque" loading="lazy" decoding="async" /></div>
+          <div class="title">Rococo musician wall plaque</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Sony WM-FX101 Walkman" data-description="Classic Sony WM-FX101 Walkman with built-in FM/AM radio, perfect for anyone who loves vintage portable audio. A great piece for collectors or for enjoying cassette tapes the old-school way, with that iconic Sony styling and compact size that slips easily into a pocket or bag.">
+          <div class="image"><img src="media/items/b28c9b5d-9c14-4b70-99a3-f08acdf0a6e9.webp" alt="Sony WM-FX101 Walkman" loading="lazy" decoding="async" /></div>
+          <div class="title">Sony WM-FX101 Walkman</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Toas-Tite sandwich maker" data-description="Fun vintage Toas-Tite round sandwich maker, perfect for making grilled cheese or campfire pies the old-fashioned way. Solid metal body with long handle and wood grip gives it that classic mid-century look and feel, great for both use and display in a retro kitchen or camping setup.">
+          <div class="image"><img src="media/items/f3b19da9-a142-49db-92af-f292c3077466.webp" alt="Toas-Tite sandwich maker" loading="lazy" decoding="async" /></div>
+          <div class="title">Toas-Tite sandwich maker</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Ornate silverplate gravy boat" data-description="Elegant, ornate silverplate gravy or sauce boat on a decorative pedestal stand, perfect for dressing up a holiday table or buffet. The classic scrollwork and raised base give it a formal, vintage look that works beautifully as a serving piece or as a decorative accent on a sideboard or hutch.">
+          <div class="image"><img src="media/items/a966bd70-a7ff-438b-a83f-c745e34687b1.webp" alt="Ornate silverplate gravy boat" loading="lazy" decoding="async" /></div>
+          <div class="title">Ornate silverplate gravy boat</div>
+        </button>
+      
+        <button class="card" data-category="Collectables" data-title="Porcelain lady figurines pair" data-description="Charming pair of vintage porcelain Victorian-style lady figurines, perfect for adding a touch of old-world romance to a shelf or curio cabinet. Each figure is nicely detailed with pastel hand-painted dresses, wide-brimmed hats, and expressive faces, making them a sweet accent for traditional or shabby-chic décor. Display them together as a pair for the best look.">
+          <div class="image"><img src="media/items/d60719fe-3e16-462f-a0ce-5f8eb5e96d63.webp" alt="Porcelain lady figurines pair" loading="lazy" decoding="async" /></div>
+          <div class="title">Porcelain lady figurines pair</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Onyx horse bookends" data-description="Attractive pair of carved onyx horse-head bookends, perfect for adding a touch of mid-century style to a bookshelf, office, or den. The natural stone veining gives each piece a unique look, and the neutral tones blend easily with many décor styles.">
+          <div class="image"><img src="media/items/e37eb86d-a4be-4e12-bf37-67eb9c7f84bb.webp" alt="Onyx horse bookends" loading="lazy" decoding="async" /></div>
+          <div class="title">Onyx horse bookends</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Pyrex Snapware glass set" data-description="New Pyrex Snapware glass food keeper set, featuring airtight, leakproof lids for storing leftovers, meal prep, and lunches. A great everyday kitchen staple from a trusted brand, perfect if you like glass storage instead of plastic.">
+          <div class="image"><img src="media/items/af3d05d8-0e94-411d-82f4-30233b33d60a.webp" alt="Pyrex Snapware glass set" loading="lazy" decoding="async" /></div>
+          <div class="title">Pyrex Snapware glass set</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Porcelain cherub trinket box" data-description="Charming ornate porcelain lidded box featuring colorful applied flowers and a sweet cherub figure supporting the bowl. The raised floral decoration and gold accents give it a classic Victorian-style look, perfect for use as a trinket or jewelry box on a vanity or dresser. A pretty accent piece for anyone who loves romantic, old-world decor.">
+          <div class="image"><img src="media/items/68103d95-a0a0-4701-83da-bfc6e5fafa73.webp" alt="Porcelain cherub trinket box" loading="lazy" decoding="async" /></div>
+          <div class="title">Porcelain cherub trinket box</div>
+        </button>
+      
+        <button class="card" data-category="Games and Media (Board Games, Video Games, Movies)" data-title="Vintage MTG card" data-description="Older Magic: The Gathering card featuring a dramatic fiery artwork and classic white border, likely from the early 1990s era of the game. A nice piece for collectors who appreciate vintage MTG art and nostalgia. Worth a closer look if you enjoy building old-school decks or binder collections.">
+          <div class="image"><img src="media/items/1f147bb8-d2d7-4fd7-a7a3-12cdb265b57a.webp" alt="Vintage MTG card" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage MTG card</div>
+        </button>
+      
+        <button class="card" data-category="Tools &amp; Hobby Equipment" data-title="Fluorescent tubes and edging" data-description="Handy mixed lot of leftover project materials, ideal for a DIYer or landlord looking for inexpensive supplies. Includes several fluorescent light tubes in boxes, two rolls of industrial lawn edging, and assorted metal and wood pieces that could be repurposed for shelving, framing, or yard projects. Great buy if you like to have extra materials on hand without paying store prices.">
+          <div class="image"><img src="media/items/84bafd39-940b-48c2-877d-1d9ffab788ec.webp" alt="Fluorescent tubes and edging" loading="lazy" decoding="async" /></div>
+          <div class="title">Fluorescent tubes and edging</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Vintage brass inkwell stand" data-description="Ornate vintage brass double inkwell stand with a rich golden tone and classic scrollwork design. This makes a great accent for a writing desk, library, or office, whether used decoratively or paired with glass ink inserts. A nice piece for anyone who loves traditional brass decor or old-world writing accessories.">
+          <div class="image"><img src="media/items/476249b6-a4ec-454d-9880-d5c5b0c0b8a0.webp" alt="Vintage brass inkwell stand" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage brass inkwell stand</div>
+        </button>
+      
+        <button class="card" data-category="Tools &amp; Hobby Equipment" data-title="Sanwa M-110 multimeter" data-description="Vintage Sanwa M-110 analog multimeter in its original fitted case, complete with red and black test leads. A classic needle-style meter for bench work, restoration projects, or as a period-correct tool for a vintage electronics setup. Great for hobbyists who appreciate traditional analog readouts and older Japanese test gear.">
+          <div class="image"><img src="media/items/908e0187-08b0-43e0-ae5e-7976406bee55.webp" alt="Sanwa M-110 multimeter" loading="lazy" decoding="async" /></div>
+          <div class="title">Sanwa M-110 multimeter</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Haviland France berry plate" data-description="Elegant Haviland France porcelain plate with a rich yellow and gold border and hand-painted style berries and foliage. This decorative piece adds a touch of classic French charm to a table setting or display cabinet and pairs beautifully with other fine china or vintage serving pieces.">
+          <div class="image"><img src="media/items/38d2d845-830c-4635-80d1-0d5d46943ca4.webp" alt="Haviland France berry plate" loading="lazy" decoding="async" /></div>
+          <div class="title">Haviland France berry plate</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Blue cloisonné vase" data-description="Decorative blue cloisonné-style metal vase with a flared rim and floral motif, perfect as an accent piece or candle holder. The rich dark blue ground and colorful raised enamel design give it a classic Asian-inspired look that works well on a mantel, shelf, or entry table.">
+          <div class="image"><img src="media/items/e7bbcb6a-f14d-4121-8c8c-ae8cc7703778.webp" alt="Blue cloisonné vase" loading="lazy" decoding="async" /></div>
+          <div class="title">Blue cloisonné vase</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Colorful floral porcelain vase" data-description="Brighten a room with this cheerful floral porcelain vase on a classic black wood stand. The colorful all-over enamel-style flower pattern pops against the white ground, making it a great accent for a vanity, entry table, or bookshelf. Perfect for displaying a small bouquet or simply as a decorative piece on its own.">
+          <div class="image"><img src="media/items/5c905605-1d6e-4693-9e47-9a4a07911ba5.webp" alt="Colorful floral porcelain vase" loading="lazy" decoding="async" /></div>
+          <div class="title">Colorful floral porcelain vase</div>
+        </button>
+      
+        <button class="card" data-category="Holiday &amp; Seasonal" data-title="Lighted glitter village base" data-description="Fun glittered lighted village base ready for your holiday display. The sculpted rocky base and small matching houses sparkle under the lights, creating an easy winter scene you can set up on a mantel, table, or under the tree. Just add batteries and your own figures or trees to complete the look.">
+          <div class="image"><img src="media/items/b8d486ab-d083-4174-aee7-11823c8318ba.webp" alt="Lighted glitter village base" loading="lazy" decoding="async" /></div>
+          <div class="title">Lighted glitter village base</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Nuance goblet set" data-description="Boxed set of 12 Nuance glass goblets, each holding about 10½ oz—perfect for everyday wine, water, or entertaining. Clean, classic shape that works with almost any table setting and gives you a ready-made matching set for dinner parties or holiday gatherings.">
+          <div class="image"><img src="media/items/6105301d-92ad-476b-9c5a-9a382b2bf29b.webp" alt="Nuance goblet set" loading="lazy" decoding="async" /></div>
+          <div class="title">Nuance goblet set</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Luminarc Java goblets" data-description="Fun and sculptural Luminarc &quot;Java&quot; glass goblets, still in their original box and ready to dress up desserts, cocktails, or fancy drinks. The ribbed swirl design and pedestal base give them a retro-modern look that works great for entertaining or display in a glass-front cabinet.">
+          <div class="image"><img src="media/items/617250dd-8e0b-4e55-8f54-57ff3ab12a20.webp" alt="Luminarc Java goblets" loading="lazy" decoding="async" /></div>
+          <div class="title">Luminarc Java goblets</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Decorative stone fruit lot" data-description="Colorful carved stone fruit set, perfect for adding a pop of color to a kitchen, dining room, or display shelf. The lot includes six pieces of fruit in rich reds, greens, yellows, and teal tones, arranged on a shiny metal tray for an instant centerpiece. Great as a vintage-style accent or to mix into a larger collection of decorative fruit.">
+          <div class="image"><img src="media/items/5eab7f9a-dc90-4cac-902d-adbf38e500d3.webp" alt="Decorative stone fruit lot" loading="lazy" decoding="async" /></div>
+          <div class="title">Decorative stone fruit lot</div>
+        </button>
+      
+        <button class="card" data-category="Clothing and Linens" data-title="Merrell black slip-ons" data-description="Comfortable black Merrell slip-on shoes with front zip detail, great for everyday wear or light walking. A solid, well-made pair from a respected outdoor brand, easy to pair with casual outfits and ideal as a grab-and-go shoe by the door.">
+          <div class="image"><img src="media/items/a174a2af-88d6-48c1-b3ab-ddbd4878f777.webp" alt="Merrell black slip-ons" loading="lazy" decoding="async" /></div>
+          <div class="title">Merrell black slip-ons</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Conair hot rollers set" data-description="Conair hot rollers set with bright pink rollers and clips, ideal for quick, easy curls at home. A great everyday styling tool if you want volume and waves without spending salon money. Box is present and unit appears gently used, perfect for a spare bathroom or dorm room setup.">
+          <div class="image"><img src="media/items/9d13ea21-eeb9-418c-bfd0-cca80252f4f6.webp" alt="Conair hot rollers set" loading="lazy" decoding="async" /></div>
+          <div class="title">Conair hot rollers set</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Equate bubble foot bath" data-description="Relax tired feet at home with this Equate Bubble Massage Foot Bath with heat maintenance. It comes in the original box and is ideal for soothing soaks, gentle bubbles, and basic foot pampering without a trip to the spa.">
+          <div class="image"><img src="media/items/4e8987b4-41fa-4263-9085-b2042a3800f3.webp" alt="Equate bubble foot bath" loading="lazy" decoding="async" /></div>
+          <div class="title">Equate bubble foot bath</div>
+        </button>
+      
+        <button class="card" data-category="Clothing and Linens" data-title="Dooney &amp; Bourke tote" data-description="Classic Dooney &amp; Bourke black logo tote with grommet and leather drawstring-style detail along the top edge. A great everyday carry bag with that recognizable DB monogram look, perfect if you like a lightweight, casual designer tote and do not mind some cosmetic wear from use.">
+          <div class="image"><img src="media/items/429b2a6b-a115-422c-af45-b8415aa18ac7.webp" alt="Dooney &amp; Bourke tote" loading="lazy" decoding="async" /></div>
+          <div class="title">Dooney &amp; Bourke tote</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Realistic cassette recorder" data-description="Vintage Realistic CTR-78 cassette recorder, a classic portable unit ideal for playing back old tapes or adding a retro touch to your office or studio. It includes the attached AC power cord and has the familiar top-mounted controls for record, play, rewind, fast-forward, stop/eject, and pause. A fun, functional piece for collectors of Radio Shack and Realistic gear or anyone wanting a simple tape player/recorder.">
+          <div class="image"><img src="media/items/b72796e9-68fb-469c-9306-993ea40a41c2.webp" alt="Realistic cassette recorder" loading="lazy" decoding="async" /></div>
+          <div class="title">Realistic cassette recorder</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="UV phone sanitizer" data-description="Keep your phone and small items cleaner with this compact UV sanitizer box. The sleek black unit plugs into the wall and is sized to fit most smartphones, making it easy to sanitize keys, earbuds, and other everyday carry items at home or in the office.">
+          <div class="image"><img src="media/items/bd36fde7-a210-414f-a813-a9c9af86e035.webp" alt="UV phone sanitizer" loading="lazy" decoding="async" /></div>
+          <div class="title">UV phone sanitizer</div>
+        </button>
+      
+        <button class="card" data-category="Clothing and Linens" data-title="Gucci-style monogram wallet" data-description="Designer-inspired brown monogram wallet or slim case with a classic tan and dark brown pattern and a green-and-red accent stripe. A stylish way to carry cards or cash, with a look that pairs well with many handbags and outfits.">
+          <div class="image"><img src="media/items/7e98e86b-3386-4e23-ac74-86e77caacd07.webp" alt="Gucci-style monogram wallet" loading="lazy" decoding="async" /></div>
+          <div class="title">Gucci-style monogram wallet</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Vintage food processor" data-description="Handy older electric food processor with a cream-colored base and matching work bowl, ideal for chopping and mixing in the kitchen. A budget-friendly option if you need a basic processor for occasional use or want a spare for messy jobs like nuts, herbs, or pet food prep.">
+          <div class="image"><img src="media/items/0fee224c-9a22-409d-bede-5d61fa18c365.webp" alt="Vintage food processor" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage food processor</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Frosted glass goblet set" data-description="Nice set of frosted stemmed goblets with a classic cut-style pattern, perfect for serving water, wine, or cocktails at your next gathering. The matching pieces give a coordinated look on the table and the frosted finish adds a soft, vintage feel that works well for everyday use or entertaining.">
+          <div class="image"><img src="media/items/507cc7e6-8352-44cf-990d-c89968c77ce5.webp" alt="Frosted glass goblet set" loading="lazy" decoding="async" /></div>
+          <div class="title">Frosted glass goblet set</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Quorum PAAL II pager" data-description="Vintage Quorum PAAL II pager with accessories, still sitting in its original plastic tray packaging. A fun throwback piece of telecom history, ideal for collectors, display, or as a conversation starter in an office or media room. Includes the main unit, belt clip/strap, and small accessory pack, giving it great display appeal for anyone into retro gadgets.">
+          <div class="image"><img src="media/items/1294ab9f-582a-42c1-ae42-1dca5fe852a3.webp" alt="Quorum PAAL II pager" loading="lazy" decoding="async" /></div>
+          <div class="title">Quorum PAAL II pager</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Cranberry cut glass bowl" data-description="Pretty cut-to-cranberry pressed glass bowl with scalloped rim and footed base, perfect for candy, nuts, or as a small centerpiece. The clear glass body is accented with deep cranberry oval panels featuring cut floral or wheat-style motifs that catch the light beautifully. A nice decorative accent for a vintage or traditional table setting.">
+          <div class="image"><img src="media/items/b029c80b-c275-4dbb-a95d-1f106e5406d3.webp" alt="Cranberry cut glass bowl" loading="lazy" decoding="async" /></div>
+          <div class="title">Cranberry cut glass bowl</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Vintage porcelain platter" data-description="Elegant oversized vintage porcelain serving platter with soft marbled glaze and flowing gold scroll and feather-like accents. A lovely statement piece for a buffet, dining table, or display, with classic styling that works well in both traditional and eclectic settings.">
+          <div class="image"><img src="media/items/49626a0a-bd63-4081-9dce-6c49b5402795.webp" alt="Vintage porcelain platter" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage porcelain platter</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Embossed metal pitcher" data-description="Decorative embossed metal pitcher with an ornate all-over floral and figure motif, great as a statement vase or accent piece. The rich dark finish and heavy relief design give it an old-world look that works well in traditional, cottage, or eclectic decor. Display it on a sideboard, entry table, or hearth, either on its own or filled with dried flowers or greenery.">
+          <div class="image"><img src="media/items/537fe86b-921e-4a16-bfe1-b8911dc15d0b.webp" alt="Embossed metal pitcher" loading="lazy" decoding="async" /></div>
+          <div class="title">Embossed metal pitcher</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Pressed glass cordial set" data-description="Charming set of small pressed glass cordial goblets with a classic faceted pattern that sparkles beautifully on the table. Perfect for after-dinner drinks, dessert wines, or as petite dessert cups for special occasions and holiday entertaining.">
+          <div class="image"><img src="media/items/6aa33a1e-98c6-45a8-87e6-024130c53f19.webp" alt="Pressed glass cordial set" loading="lazy" decoding="async" /></div>
+          <div class="title">Pressed glass cordial set</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Vintage corn pitchers" data-description="Fun pair of vintage-style ceramic corn pitchers that add a touch of farmhouse charm to a kitchen or dining room. The larger pitcher and smaller creamer have nicely modeled corn and leaf details with a warm harvest color palette, perfect for display or light use at seasonal gatherings.">
+          <div class="image"><img src="media/items/cb879514-dadf-427e-8ae0-d78e64ce4ccf.webp" alt="Vintage corn pitchers" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage corn pitchers</div>
+        </button>
+      
+        <button class="card" data-category="Collectables" data-title="Vintage Victorian-style doll" data-description="Charming vintage Victorian-style fashion doll dressed in a pale pink satin-look gown trimmed with lots of lace and a wide-brimmed matching hat. Her big blue eyes, detailed ruffled bodice, and flowing skirt make her a sweet accent for a vanity, bedroom, or doll display. A lovely decorative piece for anyone who enjoys romantic, old-fashioned décor or collects display dolls.">
+          <div class="image"><img src="media/items/1548c1cd-e522-466a-8e50-7bc9ddd100b7.webp" alt="Vintage Victorian-style doll" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage Victorian-style doll</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Audiovox 2-way radios" data-description="Audiovox GMRS122 2-way radio set, still sealed in original packaging. Includes two handheld radios and dual desktop charger, offering up to a 5-mile range with multiple channels. Great for camping, events, or keeping in vehicles for simple short-range communication.">
+          <div class="image"><img src="media/items/1d24aeb6-74e8-49e8-afeb-f7206d2366a7.webp" alt="Audiovox 2-way radios" loading="lazy" decoding="async" /></div>
+          <div class="title">Audiovox 2-way radios</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="PartyLite boxed item" data-description="PartyLite boxed décor piece ready for a new home. PartyLite is known for attractive candle accessories and home accents, and this boxed item should appeal to anyone who enjoys quality decorative pieces or needs a gift-ready item from a trusted home décor brand.">
+          <div class="image"><img src="media/items/e8923ff6-72a7-493c-9cc4-7feb3de0bcad.webp" alt="PartyLite boxed item" loading="lazy" decoding="async" /></div>
+          <div class="title">PartyLite boxed item</div>
+        </button>
+      
+        <button class="card" data-category="Clothing and Linens" data-title="Brown crocodile tote bag" data-description="Stylish brown faux-crocodile shoulder tote with a rich textured finish and decorative silver-tone medallion on the front. A great everyday bag with a classic look that pairs easily with work or casual outfits, offering plenty of room for essentials without being too bulky.">
+          <div class="image"><img src="media/items/d14e3dee-bc40-4159-a0f0-651d7ad760e5.webp" alt="Brown crocodile tote bag" loading="lazy" decoding="async" /></div>
+          <div class="title">Brown crocodile tote bag</div>
+        </button>
+      
+        <button class="card" data-category="Clothing and Linens" data-title="Tan leather shoulder bag" data-description="Simple and versatile tan leather shoulder bag with double handles and silver-tone ring hardware. The neutral color makes it an easy everyday carry for work, errands, or travel, and the soft leather has a comfortable, broken-in feel without looking overly worn.">
+          <div class="image"><img src="media/items/d5a411be-cdd2-4aa4-a8cc-c1712a725fae.webp" alt="Tan leather shoulder bag" loading="lazy" decoding="async" /></div>
+          <div class="title">Tan leather shoulder bag</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Sony microcassette recorder" data-description="Vintage Sony microcassette recorder tucked in its brown leather carry case, a fun throwback for collectors of old-school electronics or anyone wanting a retro prop. Great conversation piece and display item, especially if you enjoy classic Sony gear and analog tech.">
+          <div class="image"><img src="media/items/d10d8b58-8035-4b88-b0a7-bf08237ccc49.webp" alt="Sony microcassette recorder" loading="lazy" decoding="async" /></div>
+          <div class="title">Sony microcassette recorder</div>
+        </button>
+      
+        <button class="card" data-category="Musical Instruments &amp; Audio Gear" data-title="GE cassette recorder" data-description="Vintage GE 3-5027 personal portable cassette recorder and player, great for anyone who still has tapes to listen to or wants that classic analog recording sound. A fun retro piece for collectors, hobbyists, or for digitizing old cassettes if paired with the right gear.">
+          <div class="image"><img src="media/items/d8f5d10d-6f00-45c7-8e7c-5e50e57e9a66.webp" alt="GE cassette recorder" loading="lazy" decoding="async" /></div>
+          <div class="title">GE cassette recorder</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Vintage pastry fork set" data-description="Charming vintage set of six pastry or dessert forks presented in the original fitted case. The forks have a classic mid-century look and will polish up nicely for tea parties, dessert service, or display in a dining room. A fun, affordable way to add a bit of old-fashioned elegance to your table setting.">
+          <div class="image"><img src="media/items/e34ed424-9c5e-4f0d-a118-f22418c41680.webp" alt="Vintage pastry fork set" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage pastry fork set</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Vintage tole bird tray" data-description="Charming vintage round metal tray with a colorful pair of birds perched among flowers, framed by a wide floral border. The warm yellow ground and hand-painted tole-style design make this a lovely accent piece for cottage, shabby chic, or traditional decor. Ready to hang on the wall or use as a decorative catchall on a table or shelf.">
+          <div class="image"><img src="media/items/c6c4b164-b8c3-4344-8049-d8e653878bb1.webp" alt="Vintage tole bird tray" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage tole bird tray</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Glass casserole with carrier" data-description="Handy glass casserole dish with matching lid nestled in an insulated zippered carrier, perfect for potlucks, church suppers, and family gatherings. The carrier has handles for easy transport and a labeled hot pack pocket to help keep food warm on the go.">
+          <div class="image"><img src="media/items/d42e6855-04f9-4409-88b1-9368a01ad304.webp" alt="Glass casserole with carrier" loading="lazy" decoding="async" /></div>
+          <div class="title">Glass casserole with carrier</div>
+        </button>
+      
+        <button class="card" data-category="Collectables" data-title="Porcelain Victorian lady figurine" data-description="Charming tall porcelain figurine of a Victorian-era lady in a pastel dress and wide-brimmed hat, perfect for a curio cabinet or vintage-inspired decor. The soft hand-painted colors and detailed ruffles, bows, and lace give it a romantic, old-world feel that pairs nicely with other figurines or shabby-chic pieces.">
+          <div class="image"><img src="media/items/b3133c09-beca-405e-9961-4e2636ebb11c.webp" alt="Porcelain Victorian lady figurine" loading="lazy" decoding="async" /></div>
+          <div class="title">Porcelain Victorian lady figurine</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Legacy crystal candlesticks" data-description="Elegant pair of Legacy 24% full lead crystal candlesticks in their original box, perfect for dressing up a dining table, mantle, or holiday display. The faceted bases catch the light beautifully and add a classic, upscale touch to any room without being overly formal.">
+          <div class="image"><img src="media/items/b87562dd-4da4-4ec7-a05f-15265bdbc84a.webp" alt="Legacy crystal candlesticks" loading="lazy" decoding="async" /></div>
+          <div class="title">Legacy crystal candlesticks</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Vintage porcelain urn vase" data-description="Charming vintage porcelain urn-style vase with elegant gold trim and a romantic classical scene on the front, currently styled with faux greenery. A great accent for a mantel, sideboard, or vanity, it brings a touch of old-world charm to any room whether you keep the plant in it or use it as a small flower vase or decorative piece on its own.">
+          <div class="image"><img src="media/items/0b338c88-1b83-4763-a331-67fa9c508028.webp" alt="Vintage porcelain urn vase" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage porcelain urn vase</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Alt Österreich crest plate" data-description="Elegant Alt Österreich decorative plate featuring the Austrian double-headed eagle crest and a rich gold floral border. This makes a striking display piece for a European history, travel, or heraldry collection and would look great on a stand or in a cabinet. A nice accent for anyone with Austrian heritage or a love of classic continental décor.">
+          <div class="image"><img src="media/items/cc5dc61c-96cf-4e99-a51a-9fbf46d897ff.webp" alt="Alt Österreich crest plate" loading="lazy" decoding="async" /></div>
+          <div class="title">Alt Österreich crest plate</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Universal meat grinder" data-description="Classic vintage Universal clamp-on meat grinder, perfect for farmhouse kitchen décor or for those who still enjoy doing small-batch grinding the old-fashioned way. Solid cast metal construction with wood handle and table clamp, ready to display or clean up and put back to work.">
+          <div class="image"><img src="media/items/2eb32276-6ced-4135-91b5-6aae916fba38.webp" alt="Universal meat grinder" loading="lazy" decoding="async" /></div>
+          <div class="title">Universal meat grinder</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Vintage decorative plate" data-description="Charming large decorative plate featuring an 18th‑century style romantic garden scene framed by a rich burgundy border with delicate gold scrollwork. Perfect for display on a stand or wall in a traditional or vintage‑inspired room, this piece adds a touch of old‑world elegance and color to any space.">
+          <div class="image"><img src="media/items/1d34827b-fe27-439b-87ef-3512ec0306b8.webp" alt="Vintage decorative plate" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage decorative plate</div>
+        </button>
+      
+        <button class="card" data-category="Collectables" data-title="Japanese lacquer compact" data-description="Charming round Japanese-style lacquer compact featuring a gold scenic landscape on a dark ground, framed by an ornate metal border. The piece has a nicely aged look and would display well on a vanity, in a compact collection, or as a small accent in an Asian-inspired decor vignette. A fun little piece of vintage style with a lot of character in a small footprint.">
+          <div class="image"><img src="media/items/a87f3efc-2410-4a51-9084-859e7a6acb68.webp" alt="Japanese lacquer compact" loading="lazy" decoding="async" /></div>
+          <div class="title">Japanese lacquer compact</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Blue ceramic flower pot" data-description="Attractive blue-and-white ceramic planter with a stylized floral pattern, perfect for giving a houseplant a classic, decorative look. The flared rim and traditional motif make it an easy fit for many décor styles, from cottage to modern farmhouse. A nice upgrade from basic plastic pots and a good size for a medium houseplant.">
+          <div class="image"><img src="media/items/fde51376-99a8-40cc-9fe0-0c028214ec51.webp" alt="Blue ceramic flower pot" loading="lazy" decoding="async" /></div>
+          <div class="title">Blue ceramic flower pot</div>
+        </button>
+      
+        <button class="card" data-category="Collectables" data-title="Vintage child bust statue" data-description="Charming small vintage bust of a child, likely chalkware or plaster, with hand-painted features and a soft pastel green garment. A sweet accent for a shelf, mantel, or vintage-inspired vignette, especially if you enjoy old-world or cottage-style decor.">
+          <div class="image"><img src="media/items/1530f23d-3604-4f23-a519-d7a98e8e3bb8.webp" alt="Vintage child bust statue" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage child bust statue</div>
+        </button>
+      
+        <button class="card" data-category="Collectables" data-title="Vintage colonial figurines pair" data-description="Charming pair of vintage colonial-style figurines, featuring a gentleman and lady in period dress with soft pastel colors and nicely detailed faces. These make a sweet accent for a curio cabinet, mantel, or vintage-inspired vignette and display well together as a matched couple.">
+          <div class="image"><img src="media/items/5e29314e-669f-4c8a-bbf6-9c5fff4575e3.webp" alt="Vintage colonial figurines pair" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage colonial figurines pair</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Vintage floral cruet bottle" data-description="Charming vintage ceramic cruet bottle with a rich red floral pattern and matching handled neck and stopper. The tall, slender form and cork-topped lid make it perfect for displaying on a kitchen shelf, using as an oil or vinegar bottle, or repurposing as a decorative bud vase. A nice accent piece for cottage, farmhouse, or traditional décor.">
+          <div class="image"><img src="media/items/d96be2a7-7d55-4c07-bd3e-15a5489e793a.webp" alt="Vintage floral cruet bottle" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage floral cruet bottle</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Spa Comforts body wrap" data-description="Relax at home with this Spa Comforts aromatherapy body wrap, designed for soothing warm or cool therapy on sore muscles. The wrap contains natural eucalyptus, clove, and cinnamon to help ease stress and tension while you unwind after a long day.">
+          <div class="image"><img src="media/items/4a9dd54b-38f2-4e07-943c-0cea6d5e417c.webp" alt="Spa Comforts body wrap" loading="lazy" decoding="async" /></div>
+          <div class="title">Spa Comforts body wrap</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Yellow mixing bowl" data-description="Cheerful yellow and white mixing bowl that adds a pop of color to any kitchen. Great size for mixing batter, tossing salads, or serving side dishes, and it has that classic mid-century look people love for everyday use or display.">
+          <div class="image"><img src="media/items/7d017500-8bfe-4be5-bf99-3dd87e390e92.webp" alt="Yellow mixing bowl" loading="lazy" decoding="async" /></div>
+          <div class="title">Yellow mixing bowl</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Dash rapid egg cooker" data-description="Handy Dash Rapid Egg Cooker in its original box, perfect for quick weekday breakfasts or meal prep. Cooks up to six eggs at a time with simple one-touch operation for hard-boiled, soft-boiled, poached, or scrambled eggs. Compact size fits easily on the counter or in a cabinet and is ideal for small kitchens, dorms, or RVs.">
+          <div class="image"><img src="media/items/1a139db3-6702-435c-88a3-6c51ddb50cef.webp" alt="Dash rapid egg cooker" loading="lazy" decoding="async" /></div>
+          <div class="title">Dash rapid egg cooker</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="International Silver holiday set" data-description="Festive up your holiday table with this boxed International Silver Company serving set, featuring a cake server, fork, and spoon with charming Christmas tree and Santa handles. A great piece for entertaining or gifting, it adds a touch of sparkle and nostalgia to dessert service all season long.">
+          <div class="image"><img src="media/items/4028e0c5-4f30-4901-87ae-aa17f5495689.webp" alt="International Silver holiday set" loading="lazy" decoding="async" /></div>
+          <div class="title">International Silver holiday set</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Glass chip and dip bowl" data-description="Handy glass chip-and-dip serving set with a warm brass-tone metal stand, perfect for parties, game days, or casual entertaining. The large outer bowl holds chips or veggies while the smaller center bowl is ideal for salsa, dips, or sauces, and the integrated handles make it easy to carry from kitchen to table.">
+          <div class="image"><img src="media/items/99f50163-51d1-4606-802b-1dd772d395d5.webp" alt="Glass chip and dip bowl" loading="lazy" decoding="async" /></div>
+          <div class="title">Glass chip and dip bowl</div>
+        </button>
+      
+        <button class="card" data-category="Holiday &amp; Seasonal" data-title="Ceramic cottage tealight" data-description="Charming ceramic cottage tealight holder with a detailed shingled roof and chimney, perfect for adding a warm, storybook glow to a shelf or holiday display. Tuck a small candle or LED light inside and let the light shine through the cottage opening for a cozy accent in any room.">
+          <div class="image"><img src="media/items/8c734b7a-f3ed-484d-a961-af12b5a0f5b3.webp" alt="Ceramic cottage tealight" loading="lazy" decoding="async" /></div>
+          <div class="title">Ceramic cottage tealight</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="cast iron floral pitcher jug" data-description="Charming brown ceramic pitcher with an all-over raised floral and leaf design, perfect as a decorative accent or as a rustic vase for fresh or dried flowers. The sculpted roses and foliage give it a lot of texture and presence, making it a nice statement piece for a mantel, sideboard, or country-style kitchen.">
+          <div class="image"><img src="media/items/6e78767e-e2d6-4292-9049-105207eadca4.webp" alt="cast iron floral pitcher jug" loading="lazy" decoding="async" /></div>
+          <div class="title">cast iron floral pitcher jug</div>
+        </button>
+      
+        <button class="card" data-category="Wall Art" data-title="White Monogram S Decor" data-description="Charming white scrollwork monogram letter &quot;S&quot; ready to hang on your wall. Its clean, curvy design pops nicely against a colored background and works well in an entryway, bedroom, or gallery wall. A simple way to personalize a space with an initial or family name.">
+          <div class="image"><img src="media/items/fb35fcb4-82d7-496a-b697-87135905fd75.webp" alt="White Monogram S Decor" loading="lazy" decoding="async" /></div>
+          <div class="title">White Monogram S Decor</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Cast iron rooster trivet" data-description="Charming painted cast iron rooster trivet that doubles nicely as a small wall hanging. The bold colors and detailed tail feathers give it great farmhouse kitchen character, perfect for adding a touch of vintage country style to your stove area or backsplash.">
+          <div class="image"><img src="media/items/a23ae275-0726-4b74-9f7b-70ab8a2a6f07.webp" alt="Cast iron rooster trivet" loading="lazy" decoding="async" /></div>
+          <div class="title">Cast iron rooster trivet</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Gardenline landscaping fabric roll" data-description="New roll of Gardenline medium duty landscaping fabric, perfect for garden beds, walkways, and other landscaping projects. Helps control weeds without chemicals while allowing water and air to reach plant roots. A handy, ready-to-use roll for spring or fall yard work.">
+          <div class="image"><img src="media/items/699270c4-b005-412e-bf51-33a3ae7aca12.webp" alt="Gardenline landscaping fabric roll" loading="lazy" decoding="async" /></div>
+          <div class="title">Gardenline landscaping fabric roll</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Vintage glass canning jar" data-description="Charming tall glass storage jar with a classic wire-bail closure and heavy ceramic lid, perfect for adding a vintage touch to your kitchen or pantry. Clean it up and use it for dry goods, utensils, or simply as a decorative accent on an open shelf or counter.">
+          <div class="image"><img src="media/items/b92b61d1-c26e-41df-b459-8b6ad218bd11.webp" alt="Vintage glass canning jar" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage glass canning jar</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Porcelain rose candle holder" data-description="Delicate porcelain candle holder with soft pink applied roses and gold trim, perfect for adding a romantic, vintage touch to a vanity, bathroom, or bedside table. The sculpted petals and leaves give it a lot of texture and charm, and the compact size makes it easy to tuck into a small display or gift basket.">
+          <div class="image"><img src="media/items/e2e2d5af-b1a1-4049-ab44-23df93ab8660.webp" alt="Porcelain rose candle holder" loading="lazy" decoding="async" /></div>
+          <div class="title">Porcelain rose candle holder</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="PowerBear AM/FM Radio" data-description="Compact PowerBear AM/FM portable radio, perfect for emergencies, travel, or listening on the go. Features hi-fi sound, an auxiliary headphone port, and high-reception tuning in a slim, easy-to-carry design. Great backup radio for power outages or outdoor activities.">
+          <div class="image"><img src="media/items/51cbc7cb-22d9-4224-90fa-06f0408f2e2b.webp" alt="PowerBear AM/FM Radio" loading="lazy" decoding="async" /></div>
+          <div class="title">PowerBear AM/FM Radio</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="USB handheld mini vacuum" data-description="Compact silver handheld mini vacuum or similar USB-powered gadget, still sealed in plastic and resting in its original tray. A handy little tech accessory for cleaning keyboards, cars, or tight spaces, ideal as a spare or office tool.">
+          <div class="image"><img src="media/items/db40ce55-fc55-40d9-a650-4bb780edb421.webp" alt="USB handheld mini vacuum" loading="lazy" decoding="async" /></div>
+          <div class="title">USB handheld mini vacuum</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Kodak digital camera" data-description="Older Kodak digital point-and-shoot camera with power cord and batteries, bagged together and ready for a new home. A fun piece for a photography tinkerer, display shelf, or anyone who enjoys experimenting with early digital tech.">
+          <div class="image"><img src="media/items/cc06b498-ff90-45f0-a56f-aa01c17a3474.webp" alt="Kodak digital camera" loading="lazy" decoding="async" /></div>
+          <div class="title">Kodak digital camera</div>
+        </button>
+      
+        <button class="card" data-category="Tools &amp; Hobby Equipment" data-title="BESTWIN flashlight kit" data-description="Compact BESTWIN tactical-style flashlight kit in a rugged green carry case, complete with rechargeable battery and accessories. A handy grab-and-go light for glove box, toolbox, or emergency kit, with foam-lined storage to keep everything protected and organized.">
+          <div class="image"><img src="media/items/53dad9d7-6b70-4039-92a5-2e647b962064.webp" alt="BESTWIN flashlight kit" loading="lazy" decoding="async" /></div>
+          <div class="title">BESTWIN flashlight kit</div>
+        </button>
+      
+        <button class="card" data-category="Tools &amp; Hobby Equipment" data-title="Durham&#39;s water putty can" data-description="Fun vintage Durham&#39;s Rock Hard Water Putty can with classic strongman graphics, perfect for a workshop display, man cave shelf, or retro decor accent. The can has an appealing aged look and would fit right in with other old hardware or paint tins for a nostalgic shop vibe.">
+          <div class="image"><img src="media/items/f6d7ef03-5d43-4c78-b0bb-05f57e1cbc26.webp" alt="Durham&#39;s water putty can" loading="lazy" decoding="async" /></div>
+          <div class="title">Durham&#39;s water putty can</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Porcelain violin trinket box" data-description="Charming porcelain trinket box shaped like a violin, finished in a creamy glaze with delicate raised roses on the lid and subtle gold accents along the edges. A sweet little accent for a vanity, dresser, or music-themed display, perfect for holding rings, earrings, or other tiny keepsakes.">
+          <div class="image"><img src="media/items/8e465569-8d9b-4f77-b5d8-64de0ed92a61.webp" alt="Porcelain violin trinket box" loading="lazy" decoding="async" /></div>
+          <div class="title">Porcelain violin trinket box</div>
+        </button>
+      
+        <button class="card" data-category="Household &quot;Maybe Valuable&quot; Items" data-title="Conair fabric defuzzer" data-description="Handy Conair battery-operated fabric defuzzer, perfect for refreshing sweaters, coats, and upholstery by removing fuzz, lint, and pilling. Compact and easy to grip, it’s great to keep in the laundry room or closet for quick touch-ups and travel.">
+          <div class="image"><img src="media/items/0a92b127-853f-4f9d-a9b4-4b8c6ac541a5.webp" alt="Conair fabric defuzzer" loading="lazy" decoding="async" /></div>
+          <div class="title">Conair fabric defuzzer</div>
+        </button>
+      
+        <button class="card" data-category="Electronics &amp; Technology" data-title="Blackweb dual wall charger" data-description="New in package Blackweb 5.4 amp dual‑port wall charger, ready to power both Type‑C and standard USB devices at the same time. A handy spare for travel, office, or bedside charging with a clean modern look and compact size.">
+          <div class="image"><img src="media/items/5e00cee8-7692-4d43-aa94-a2041f62e141.webp" alt="Blackweb dual wall charger" loading="lazy" decoding="async" /></div>
+          <div class="title">Blackweb dual wall charger</div>
+        </button>
+      
+        <button class="card" data-category="Collectables" data-title="Porcelain pink flower" data-description="Delicate pink porcelain flower figurine, perfect for adding a soft, romantic touch to a shelf, vanity, or curio cabinet. The realistic petals and subtle shading make it a charming accent piece on its own or grouped with other small collectibles.">
+          <div class="image"><img src="media/items/0f68aff1-9ea6-43ca-b747-d07ad789c169.webp" alt="Porcelain pink flower" loading="lazy" decoding="async" /></div>
+          <div class="title">Porcelain pink flower</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Vintage rose teacup" data-description="Charming vintage porcelain teacup with a romantic pink rose motif and delicate gold trim, perfect for display or for adding a touch of old-world elegance to tea time. The gently scalloped shape and ornate handle give it a classic, collectible look that pairs nicely with other floral china.">
+          <div class="image"><img src="media/items/e04310c6-a92a-4302-9069-64f30dc36b26.webp" alt="Vintage rose teacup" loading="lazy" decoding="async" /></div>
+          <div class="title">Vintage rose teacup</div>
+        </button>
+      
+        <button class="card" data-category="Books, Manuals &amp; Paper Collections" data-title="Joyce Meyer devotional book" data-description="Inspirational 365-day devotional by Joyce Meyer, perfect for daily encouragement and quiet time. A great bedside or morning-read companion for anyone looking to grow in faith and trust in God throughout the year.">
+          <div class="image"><img src="media/items/c4bda937-90ab-41ac-b857-9461d38cdeee.webp" alt="Joyce Meyer devotional book" loading="lazy" decoding="async" /></div>
+          <div class="title">Joyce Meyer devotional book</div>
+        </button>
+      
+        <button class="card" data-category="Books, Manuals &amp; Paper Collections" data-title="Brain Games puzzle book" data-description="Fun Brain Games spiral-bound puzzle book titled &quot;Lower Your Brain Age in Minutes a Day&quot; (Collection #1). Packed with number and logic puzzles to help boost memory, reasoning, and creative thinking—great for casual brain training or a relaxing challenge at home or on the go.">
+          <div class="image"><img src="media/items/1829d9f9-ca96-4baa-b3d7-864c27263d9a.webp" alt="Brain Games puzzle book" loading="lazy" decoding="async" /></div>
+          <div class="title">Brain Games puzzle book</div>
+        </button>
+      
+        <button class="card" data-category="Books, Manuals &amp; Paper Collections" data-title="Penny Press word seeks" data-description="Fun Penny Press &quot;Penny&#39;s Finest&quot; Good Time Word Seeks puzzle book in the super jumbo size, perfect for relaxing brain exercise at home or on the go. Great pick for word search fans looking for lots of puzzles in one volume.">
+          <div class="image"><img src="media/items/392a141d-7b53-4a29-9cf3-b7d3d28af5cb.webp" alt="Penny Press word seeks" loading="lazy" decoding="async" /></div>
+          <div class="title">Penny Press word seeks</div>
+        </button>
+      
+        <button class="card" data-category="Kitchen and Dining" data-title="Small clear kitchen gadget" data-description="Handy little modern kitchen gadget in clear plastic with a sleek, tapered design and black grip band. Perfect as an extra tool for the bar cart or countertop, or for anyone who likes having spare gadgets on hand for cooking and entertaining.">
+          <div class="image"><img src="media/items/370eb629-4ea7-4cad-8c24-40aebd5f3472.webp" alt="Small clear kitchen gadget" loading="lazy" decoding="async" /></div>
+          <div class="title">Small clear kitchen gadget</div>
+        </button>
+      
+        <button class="card" data-category="Uncategorized" data-title="Untitled item" data-description="No customer description.">
+          <div class="image"><div class="placeholder"></div></div>
+          <div class="title">Untitled item</div>
+        </button>
+      
+      </div>
+      <div class="pagination" id="pagination">
+        <button id="prevPage">← Previous</button>
+        <span class="page-info" id="pageInfo">Page 1</span>
+        <button id="nextPage">Next →</button>
+      </div>
+    </main>
+    <div class="modal" id="detailModal">
+      <div class="modal-card">
+        <div style="display:flex; justify-content: space-between; gap: 12px; align-items:center;">
+          <p class="modal-title" id="modalTitle"></p>
+          <button class="modal-close" id="modalClose">Close</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+      </div>
+    </div>
+    <script>
+      const grid = document.getElementById("catalogGrid");
+      const filter = document.getElementById("categoryFilter");
+      const modal = document.getElementById("detailModal");
+      const modalTitle = document.getElementById("modalTitle");
+      const modalBody = document.getElementById("modalBody");
+      const modalClose = document.getElementById("modalClose");
+      const prevPageBtn = document.getElementById("prevPage");
+      const nextPageBtn = document.getElementById("nextPage");
+      const pageInfo = document.getElementById("pageInfo");
+
+      const ITEMS_PER_PAGE = 50;
+      let currentPage = 1;
+      let filteredCards = [];
+
+      const applyFilter = () => {
+        const value = filter.value;
+        const allCards = Array.from(grid.querySelectorAll(".card"));
+
+        filteredCards = allCards.filter((card) => {
+          return value === "all" || card.dataset.category === value;
+        });
+
+        currentPage = 1;
+        renderPage();
+      };
+
+      const renderPage = () => {
+        const allCards = Array.from(grid.querySelectorAll(".card"));
+        const totalPages = Math.ceil(filteredCards.length / ITEMS_PER_PAGE);
+        const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIdx = startIdx + ITEMS_PER_PAGE;
+
+        // Hide all cards first
+        allCards.forEach(card => card.style.display = "none");
+
+        // Show only cards for current page
+        filteredCards.slice(startIdx, endIdx).forEach(card => {
+          card.style.display = "";
+        });
+
+        // Update pagination controls
+        pageInfo.textContent = "Page " + currentPage + " of " + (totalPages || 1) + " (" + filteredCards.length + " items)";
+        prevPageBtn.disabled = currentPage === 1;
+        nextPageBtn.disabled = currentPage >= totalPages;
+
+        // Scroll to top on page change
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      filter.addEventListener("change", applyFilter);
+
+      prevPageBtn.addEventListener("click", () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderPage();
+        }
+      });
+
+      nextPageBtn.addEventListener("click", () => {
+        const totalPages = Math.ceil(filteredCards.length / ITEMS_PER_PAGE);
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderPage();
+        }
+      });
+
+      applyFilter();
+
+      grid.addEventListener("click", (event) => {
+        const target = event.target.closest(".card");
+        if (!target) return;
+        modalTitle.textContent = target.dataset.title || "Item";
+        modalBody.textContent = target.dataset.description || "";
+        modal.classList.add("open");
+      });
+
+      modalClose.addEventListener("click", () => modal.classList.remove("open"));
+      modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+          modal.classList.remove("open");
+        }
+      });
+    </script>
+  </body>
+</html>
